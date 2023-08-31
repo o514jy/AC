@@ -4,6 +4,7 @@
 #include "Object/AC_EnvObject.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/StaticMeshActor.h"
+#include "AC/Enum/AC_Enum.h"
 
 // Sets default values
 AAC_EnvObject::AAC_EnvObject()
@@ -61,24 +62,26 @@ TObjectPtr<AActor> AAC_EnvObject::GetMainCamera()
 	return MainCamera;
 }
 
-TSet<TObjectPtr<AStaticMeshActor>> AAC_EnvObject::GetWaitingSeat()
+TArray<TObjectPtr<AStaticMeshActor>> AAC_EnvObject::GetWaitingSeat()
 {
 	check(!arrOutActors.IsEmpty());
+
 	
 	if (SM_WaitingSeat.IsEmpty() == true)
 	{
+		SM_WaitingSeat.Init(nullptr, 2);
 		for (int i = 0; i < arrOutActors.Num(); i++)
 		{
 			if (arrOutActors[i]->GetActorLabel() == TEXT("SM_WaitingSeat1234"))
 			{
 				AStaticMeshActor* SM_WaitingSeat1234 = Cast<AStaticMeshActor>(arrOutActors[i]);
-				SM_WaitingSeat.Add(SM_WaitingSeat1234);
+				SM_WaitingSeat[Def_WaitingSeat1234] = SM_WaitingSeat1234;
 			}
 
 			if (arrOutActors[i]->GetActorLabel() == TEXT("SM_WaitingSeat5678"))
 			{
 				AStaticMeshActor* SM_WaitingSeat5678 = Cast<AStaticMeshActor>(arrOutActors[i]);
-				SM_WaitingSeat.Add(SM_WaitingSeat5678);
+				SM_WaitingSeat[Def_WaitingSeat5678] = SM_WaitingSeat5678;
 			}
 		}
 	}
@@ -86,36 +89,37 @@ TSet<TObjectPtr<AStaticMeshActor>> AAC_EnvObject::GetWaitingSeat()
 	return SM_WaitingSeat;
 }
 
-TSet<TObjectPtr<AStaticMeshActor>> AAC_EnvObject::GetArena()
+TArray<TObjectPtr<AStaticMeshActor>> AAC_EnvObject::GetArena()
 {
 	check(!arrOutActors.IsEmpty());
 
 	if (SM_Arena.IsEmpty() == true)
 	{
+		SM_Arena.Init(nullptr, 4);
 		for (int i = 0; i < arrOutActors.Num(); i++)
 		{
 			if (arrOutActors[i]->GetActorLabel() == TEXT("SM_Arena_LeftDown"))
 			{
 				AStaticMeshActor* SM_Arena_LeftDown = Cast<AStaticMeshActor>(arrOutActors[i]);
-				SM_Arena.Add(SM_Arena_LeftDown);
+				SM_Arena[Def_ArenaLeftDown] = SM_Arena_LeftDown;
 			}
 
 			if (arrOutActors[i]->GetActorLabel() == TEXT("SM_Arena_LeftUp"))
 			{
 				AStaticMeshActor* SM_Arena_LeftUp = Cast<AStaticMeshActor>(arrOutActors[i]);
-				SM_Arena.Add(SM_Arena_LeftUp);
+				SM_Arena[Def_ArenaLeftUp] = SM_Arena_LeftUp;
 			}
 			
 			if (arrOutActors[i]->GetActorLabel() == TEXT("SM_Arena_RightDown"))
 			{
 				AStaticMeshActor* SM_Arena_RightDown = Cast<AStaticMeshActor>(arrOutActors[i]);
-				SM_Arena.Add(SM_Arena_RightDown);
+				SM_Arena[Def_ArenaRightDown] = SM_Arena_RightDown;
 			}
 
 			if (arrOutActors[i]->GetActorLabel() == TEXT("SM_Arena_RightUp"))
 			{
 				AStaticMeshActor* SM_Arena_RightUp = Cast<AStaticMeshActor>(arrOutActors[i]);
-				SM_Arena.Add(SM_Arena_RightUp);
+				SM_Arena[Def_ArenaRightUp] = SM_Arena_RightUp;
 			}
 		}
 	}

@@ -44,6 +44,7 @@ public:
 	AAC_Tactician* GetTactician();
 	
 	bool SellChampionCardUsingKey(FString key, int championCost);
+	bool FindAndPlaceEmptySeat(FString key, TMap<FString, FChampionKeyArr>& championPool);
 
 private:
 	UPROPERTY()

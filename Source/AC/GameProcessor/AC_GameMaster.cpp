@@ -4,10 +4,14 @@
 #include "GameProcessor/AC_GameMaster.h"
 #include "AC/Library/AC_FunctionLibrary.h"
 #include "AC/Managers/AC_DataManager.h"
+#include "AC/Managers/AC_ObjectManager.h"
 #include "AC/Data/AC_ChampionInfo.h"
 #include "AC/Data/AC_StoreProbabilityInfo.h"
 #include "AC/Character/AC_Tactician.h"
+#include "AC/Object/AC_EnvObject.h"
 #include "Kismet/GameplayStatics.h"
+#include "Engine/StaticMeshActor.h"
+#include "AC/Enum/AC_Enum.h"
 
 // Sets default values
 AAC_GameMaster::AAC_GameMaster()
@@ -146,31 +150,69 @@ AAC_Tactician* AAC_GameMaster::GetTactician()
 
 bool AAC_GameMaster::SellChampionCardUsingKey(FString key, int championCost)
 {
-	int arrSize;
+	bool sellPossibility = false;
+
 	switch (championCost)
 	{
 	case 1:
-		arrSize = ChampionPool1Cost[key].ChampionKeyArr.Num();
-		if (arrSize <= 0)
-			return false;
-		ChampionPool1Cost[key].ChampionKeyArr.RemoveAt(arrSize - 1);
+		sellPossibility = FindAndPlaceEmptySeat(key, OUT ChampionPool1Cost);
 		break;
 	case 2:
-		arrSize = ChampionPool2Cost[key].ChampionKeyArr.Num();
-		if (ChampionPool2Cost[key].ChampionKeyArr.Num() <= 0)
-			return false;
-		ChampionPool2Cost[key].ChampionKeyArr.RemoveAt(arrSize - 1);
+		sellPossibility = FindAndPlaceEmptySeat(key, OUT ChampionPool2Cost);
 		break;
 	case 3:
-		arrSize = ChampionPool3Cost[key].ChampionKeyArr.Num();
-		if (ChampionPool3Cost[key].ChampionKeyArr.Num() <= 0)
-			return false;
-		ChampionPool3Cost[key].ChampionKeyArr.RemoveAt(arrSize - 1);
+		sellPossibility = FindAndPlaceEmptySeat(key, OUT ChampionPool3Cost);
 		break;
 	default:
 		break;
 	}
 
-	return true;
+	return sellPossibility;
+}
+
+bool AAC_GameMaster::FindAndPlaceEmptySeat(FString key, TMap<FString, FChampionKeyArr>& championPool)
+{
+	int arrSize;
+	TArray<FString> wcarr;
+	bool sold = false;
+
+	arrSize = championPool[key].ChampionKeyArr.Num();
+	if (arrSize <= 0)
+		return false;
+	championPool[key].ChampionKeyArr.RemoveAt(arrSize - 1);
+	// TODO : 스폰
+	wcarr = GetTactician()->GetWaitingChampionArr();
+	for (int i = 0; i < wcarr.Num(); i++)
+	{
+		if (wcarr[i] == FString())
+		{
+			sold = true;
+			GetTactician()->SetWaitingChampionArr(key, i);
+			TArray<AStaticMeshActor*> waitSeatArr = UAC_FunctionLibrary::GetObjectManager(GetWorld())->GetEnvObject()->GetWaitingSeat();
+			FVector loc;
+			if (i < 4)
+			{
+				loc = waitSeatArr[Def_WaitingSeat1234]->GetActorLocation();
+				loc.Y += 50.f + 100 * i;
+			}
+			else
+			{
+				loc = waitSeatArr[Def_WaitingSeat5678]->GetActorLocation();
+				loc.Y += 50.f + 100 * (i - 4);
+			}
+
+			loc.X += 50.f;
+			loc.Z += 50.f;
+
+			UAC_FunctionLibrary::GetObjectManager(GetWorld())->AddAndSpawnCharacter(
+				key,
+				loc,
+				FRotator(0, 0, 0),
+				FActorSpawnParameters()
+			);
+			break;
+		}
+	}
+	return sold;
 }
 

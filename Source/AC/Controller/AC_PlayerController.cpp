@@ -13,6 +13,9 @@
 #include "Components/SplineComponent.h"
 #include "Math/UnrealMathUtility.h"
 #include "../Interface/AC_TargetInterface.h"
+#include "AC/Managers/AC_UIManager.h"
+#include "AC/UI/ChampionStore/AC_ChampionStoreUI.h"
+#include "AC/Library/AC_FunctionLibrary.h"
 
 AAC_PlayerController::AAC_PlayerController()
 {
@@ -175,11 +178,13 @@ void AAC_PlayerController::OnSetLeftMouseButtonReleased()
 		{
 			bIsPicked = false;
 			PickedActor = nullptr;
+			Cast<UAC_ChampionStoreUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::ChampionStoreUI))->SetSellingOverlayAndPrice(false, 1);
 		}
 	}
 	else
 	{
 		PickedActor = nullptr;
+		Cast<UAC_ChampionStoreUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::ChampionStoreUI))->SetSellingOverlayAndPrice(false, 1);
 	}
 
 	FollowTime = 0.f;
@@ -236,6 +241,8 @@ void AAC_PlayerController::TickPickingObject()
 
 void AAC_PlayerController::PickingObject()
 {
+	Cast<UAC_ChampionStoreUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::ChampionStoreUI))->SetSellingOverlayAndPrice(true, 1);
+
 	FHitResult CursorHit;
 	//FHitResult CursorHitTemp;
 

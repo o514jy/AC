@@ -8,7 +8,16 @@
 
 class AAC_ObjectBase;
 class AAC_CharacterBase;
+class AAC_Champion;
 class AAC_EnvObject;
+// Ã¨ÇÇ¾ð
+class AAC_DemonDark;
+class AAC_DemonRed;
+class AAC_GhoulAbyss;
+class AAC_GoblinShaman;
+class AAC_GoblinSlingshot;
+class AAC_GoblinSpear;
+class AAC_ShroomPoison;
 
 UCLASS()
 class AC_API AAC_ObjectManager : public AActor
@@ -18,6 +27,8 @@ class AC_API AAC_ObjectManager : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AAC_ObjectManager();
+
+	void LoadChampionClass();
 
 protected:
 	// Called when the game starts or when spawned
@@ -34,13 +45,34 @@ public:
 	void SetObjectOnOff(const FString& Key, bool flag);
 
 	void AddObject(AAC_ObjectBase* object);
-	void AddCharacter(AAC_CharacterBase* character);
+	void AddAndSpawnCharacter(const FString& key, FVector location = FVector(0, 0, 0), FRotator rotation = FRotator(0, 0, 0), FActorSpawnParameters spawnParams = FActorSpawnParameters());
 
 	TObjectPtr<AAC_EnvObject> GetEnvObject();
 
 private:
 	TMap<FString/*key*/, AAC_ObjectBase*> ObjectMap;
-	TMap<FString/*key*/, AAC_CharacterBase*> CharacterMap;
+	TMap<FString/*key*/, AAC_Champion*> ChampionMap;
 	
 	TObjectPtr<AAC_EnvObject> EnvObject;
+
+	UPROPERTY()
+	TSubclassOf<AAC_DemonDark> DemonDarkClass;
+
+	UPROPERTY()
+	TSubclassOf<AAC_DemonRed> DemonRedClass;
+
+	UPROPERTY()
+	TSubclassOf<AAC_GhoulAbyss> GhoulAbyssClass;
+
+	UPROPERTY()
+	TSubclassOf<AAC_GoblinShaman> GoblinShamanClass;
+
+	UPROPERTY()
+	TSubclassOf<AAC_GoblinSlingshot> GoblinSlingshotClass;
+
+	UPROPERTY()
+	TSubclassOf<AAC_GoblinSpear> GoblinSpearClass;
+
+	UPROPERTY()
+	TSubclassOf<AAC_ShroomPoison> ShroomPoisonClass;
 };

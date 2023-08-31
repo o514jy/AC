@@ -29,9 +29,9 @@ public:
 
 	TObjectPtr<AActor> GetMainCamera();
 
-	TSet<TObjectPtr<AStaticMeshActor>> GetWaitingSeat();
+	TArray<TObjectPtr<AStaticMeshActor>> GetWaitingSeat();
 
-	TSet<TObjectPtr<AStaticMeshActor>> GetArena();
+	TArray<TObjectPtr<AStaticMeshActor>> GetArena();
 
 	TObjectPtr<AStaticMeshActor> GetItemSeat();
 
@@ -43,10 +43,10 @@ private:
 	TObjectPtr<AActor> MainCamera;
 
 	UPROPERTY()
-	TSet<TObjectPtr<AStaticMeshActor>> SM_WaitingSeat;
+	TArray<TObjectPtr<AStaticMeshActor>> SM_WaitingSeat;
 
 	UPROPERTY()
-	TSet<TObjectPtr<AStaticMeshActor>> SM_Arena;
+	TArray<TObjectPtr<AStaticMeshActor>> SM_Arena;
 
 	UPROPERTY()
 	TObjectPtr<AStaticMeshActor> SM_ItemSeat;

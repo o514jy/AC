@@ -6,6 +6,7 @@
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 #include "Components/ProgressBar.h"
+#include "Components/Overlay.h"
 
 #include "AC/Library/AC_FunctionLibrary.h"
 #include "AC/Managers/AC_DataManager.h"
@@ -59,8 +60,6 @@ void UAC_ChampionStoreUI::InitStoreUI()
 
 	int possessionGold = tacticianStat.PossessionGold;
 	SetPossessionGoldText(possessionGold);
-
-
 }
 
 void UAC_ChampionStoreUI::SetChampionCards()
@@ -163,6 +162,19 @@ void UAC_ChampionStoreUI::SetTacticianXpProgressBar(float xpRatio)
 void UAC_ChampionStoreUI::SetPossessionGoldText(int gold)
 {
 	PossessionGoldText->SetText(FText::FromString(FString::FromInt(gold)));
+}
+
+void UAC_ChampionStoreUI::SetSellingOverlayAndPrice(bool visible, int price)
+{
+	if (visible == true)
+	{
+		SellingOverlay->SetVisibility(ESlateVisibility::HitTestInvisible);
+		SellingPriceText->SetText(FText::FromString(FString::FromInt(price)));
+	}
+	else
+	{
+		SellingOverlay->SetVisibility(ESlateVisibility::Hidden);
+	}
 }
 
 bool UAC_ChampionStoreUI::GetbIsLocked()

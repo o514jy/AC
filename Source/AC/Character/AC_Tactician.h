@@ -60,6 +60,12 @@ public:
 
 	bool SubPossessionGold(int subGold);
 
+	void SetWaitingChampionArr(const FString& key, int index);
+	TArray<FString> GetWaitingChampionArr();
+
 private:
 	FTacticianStat TacticianStat;
+
+	TArray<FString/*key*/> WaitingChampionArr;
+	TArray<FString/*Key*/> ArenaChampionArr;
 };

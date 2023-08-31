@@ -11,6 +11,7 @@ class UTextBlock;
 class UProgressBar;
 class UButton;
 class UAC_ChampionCardUI;
+class UOverlay;
 
 class AAC_GameMaster;
 
@@ -48,6 +49,9 @@ public:
 
 	UFUNCTION()
 	void SetPossessionGoldText(int gold);
+
+	UFUNCTION()
+	void SetSellingOverlayAndPrice(bool visible, int price);
 
 	UFUNCTION()
 	bool GetbIsLocked();
@@ -117,4 +121,10 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UAC_ChampionCardUI> ChampionCard5;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UOverlay> SellingOverlay;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> SellingPriceText;
 };

@@ -14,7 +14,10 @@ AAC_Tactician::AAC_Tactician()
 {
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Tactician"));
 
-	Key = "전략가1";
+	Key = "Tactician1";
+
+	WaitingChampionArr.Init(FString(), 8);
+	ArenaChampionArr.Init(FString(), 32);
 }
 
 FTacticianStat AAC_Tactician::GetTacticianStat()
@@ -110,4 +113,14 @@ bool AAC_Tactician::SubPossessionGold(int subGold)
 	Cast<UAC_ChampionStoreUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::ChampionStoreUI))->SetPossessionGoldText(TacticianStat.PossessionGold);
 
 	return true;
+}
+
+void AAC_Tactician::SetWaitingChampionArr(const FString& key, int index)
+{
+	WaitingChampionArr[index] = key;
+}
+
+TArray<FString> AAC_Tactician::GetWaitingChampionArr()
+{
+	return WaitingChampionArr;
 }

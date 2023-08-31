@@ -25,3 +25,13 @@ enum class EUIType : uint8
 
 #define TyleSizeFloor1x1 100
 
+#define Def_WaitingSeat1234 0
+#define Def_WaitingSeat5678 1
+
+#define Def_ArenaLeftDown 0
+#define Def_ArenaLeftUp 1
+#define Def_ArenaRightDown 2
+#define Def_ArenaRightUp 3
+
+
+
