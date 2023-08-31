@@ -21,7 +21,7 @@ void AAC_GameMaster::BeginPlay()
 {
 	Super::BeginPlay();
 	InitChampionPoolAllCost();
-	PickAtRandomChampionCardName();
+	PickChampionCardRandomlyUsingKey();
 }
 
 // Called every frame
@@ -45,22 +45,38 @@ void AAC_GameMaster::InitChampionPoolAllCost()
 {
 	for (FChampionInfo info : GetChampionInfoArr())
 	{
+		FChampionKeyArr CKQ;
 		switch (info.ChampionCost)
 		{
 		case 1:
-			ChampionPool1Cost.Add(info.ChampionName, 30);
+			for (int i = 30; i > 0; i--)
+			{
+				const FString name = info.Key + FString::Printf(TEXT("%d"), i);
+				CKQ.ChampionKeyArr.Add(name);
+			}
+			ChampionPool1Cost.Add(info.Key, CKQ);
 			break;
 		case 2:
-			ChampionPool2Cost.Add(info.ChampionName, 15);
+			for (int i = 15; i > 0; i--)
+			{
+				const FString name = info.Key + FString::Printf(TEXT("%d"), i);
+				CKQ.ChampionKeyArr.Add(name);
+			}
+			ChampionPool2Cost.Add(info.Key, CKQ);
 			break;
 		case 3:
-			ChampionPool3Cost.Add(info.ChampionName, 10);
+			for (int i = 10; i > 0; i--)
+			{
+				const FString name = info.Key + FString::Printf(TEXT("%d"), i);
+				CKQ.ChampionKeyArr.Add(name);
+			}
+			ChampionPool3Cost.Add(info.Key, CKQ);
 			break;
 		}
 	}
 }
 
-FString AAC_GameMaster::PickAtRandomChampionCardName()
+FString AAC_GameMaster::PickChampionCardRandomlyUsingKey()
 {
 	int level = GetTactician()->GetTacticianStat().Level;
 	TMap<int/*Tactician Level*/, FProbabilityInfoArr> storeMap = UAC_FunctionLibrary::GetDataManager(GetWorld())->GetStoreProbabilityInfo()->StoreProbabilityInfoMap;
@@ -71,28 +87,28 @@ FString AAC_GameMaster::PickAtRandomChampionCardName()
 
 	TArray<int> probArr = storeMap.Find(level)->ProbabilityInfoArr;
 
-	FString PickedChampionName;
+	FString PickedKey;
 
 	if (costProb <= probArr[0])
 	{
 		// 1코스트 챔피언 생성
-		PickedChampionName = FindSpecificName(RS, ChampionPool1Cost);
+		PickedKey = FindSpecificKey(RS, ChampionPool1Cost);
 	}
 	else if (costProb > probArr[0] && costProb <= probArr[0] + probArr[1])
 	{
 		// 2코스트 챔피언 생성
-		PickedChampionName = FindSpecificName(RS, ChampionPool2Cost);
+		PickedKey = FindSpecificKey(RS, ChampionPool2Cost);
 	}
 	else
 	{
 		// 3코스트 챔피언 생성
-		PickedChampionName = FindSpecificName(RS, ChampionPool3Cost);
+		PickedKey = FindSpecificKey(RS, ChampionPool3Cost);
 	}
 
-	return PickedChampionName;
+	return PickedKey;
 }
 
-FString AAC_GameMaster::FindSpecificName(FRandomStream RS, TMap<FString, int> championPool)
+FString AAC_GameMaster::FindSpecificKey(FRandomStream RS, TMap<FString, FChampionKeyArr> championPool)
 {
 	RS.GenerateNewSeed();
 
@@ -101,21 +117,21 @@ FString AAC_GameMaster::FindSpecificName(FRandomStream RS, TMap<FString, int> ch
 	TArray<int> elemArr;
 	for (auto& elem : championPool)
 	{
-		poolSize += elem.Value;
-		elemArr.Add(elem.Value);
+		poolSize += elem.Value.ChampionKeyArr.Num();
+		elemArr.Add(elem.Value.ChampionKeyArr.Num());
 	}
 
 	int championProb = RS.RandRange(1, poolSize);
 	int weight = 0;
 	for (auto& elem : championPool)
 	{
-		weight += elem.Value;
+		weight += elem.Value.ChampionKeyArr.Num();
 		if (weight >= championProb)
 		{
 			return elem.Key;
 		}
 	}
-
+	
 	return FString();
 }
 
@@ -128,24 +144,28 @@ AAC_Tactician* AAC_GameMaster::GetTactician()
 	return Tactician;
 }
 
-bool AAC_GameMaster::SellingChampionForName(FString championName, int championCost)
+bool AAC_GameMaster::SellChampionCardUsingKey(FString key, int championCost)
 {
+	int arrSize;
 	switch (championCost)
 	{
 	case 1:
-		if (ChampionPool1Cost[championName] <= 0)
+		arrSize = ChampionPool1Cost[key].ChampionKeyArr.Num();
+		if (arrSize <= 0)
 			return false;
-		ChampionPool1Cost[championName]--;
+		ChampionPool1Cost[key].ChampionKeyArr.RemoveAt(arrSize - 1);
 		break;
 	case 2:
-		if (ChampionPool2Cost[championName] <= 0)
+		arrSize = ChampionPool2Cost[key].ChampionKeyArr.Num();
+		if (ChampionPool2Cost[key].ChampionKeyArr.Num() <= 0)
 			return false;
-		ChampionPool2Cost[championName]--;
+		ChampionPool2Cost[key].ChampionKeyArr.RemoveAt(arrSize - 1);
 		break;
 	case 3:
-		if (ChampionPool3Cost[championName] <= 0)
+		arrSize = ChampionPool3Cost[key].ChampionKeyArr.Num();
+		if (ChampionPool3Cost[key].ChampionKeyArr.Num() <= 0)
 			return false;
-		ChampionPool3Cost[championName]--;
+		ChampionPool3Cost[key].ChampionKeyArr.RemoveAt(arrSize - 1);
 		break;
 	default:
 		break;

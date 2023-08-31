@@ -9,15 +9,14 @@
 struct FChampionInfo;
 class AAC_Tactician;
 
-//USTRUCT(BlueprintType)
-//struct FChampionKeyQueue
-//{
-//	GENERATED_BODY()
-//
-//public:
-//	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-//	TQueue<FString> ChampionKeyQueue;
-//};
+USTRUCT(BlueprintType)
+struct FChampionKeyArr
+{
+	GENERATED_BODY()
+
+public:
+	TArray<FString> ChampionKeyArr;
+};
 
 UCLASS()
 class AC_API AAC_GameMaster : public AActor
@@ -39,13 +38,12 @@ public:
 	TArray<FChampionInfo> GetChampionInfoArr();
 
 	void InitChampionPoolAllCost();
-
-	FString PickAtRandomChampionCardName();
-	FString FindSpecificName(FRandomStream RS, TMap<FString, int> championPool);
+	FString PickChampionCardRandomlyUsingKey();
+	FString FindSpecificKey(FRandomStream RS, TMap<FString, FChampionKeyArr> championPool);
 
 	AAC_Tactician* GetTactician();
-
-	bool SellingChampionForName(FString championName, int championCost);
+	
+	bool SellChampionCardUsingKey(FString key, int championCost);
 
 private:
 	UPROPERTY()
@@ -55,11 +53,11 @@ private:
 	TObjectPtr<AAC_Tactician> Tactician = nullptr;
 
 	UPROPERTY()
-	TMap<FString/*key*/, int/*개수*/> ChampionPool1Cost; // 챔피언당 30
+	TMap<FString/*key*/, FChampionKeyArr> ChampionPool1Cost; // 챔피언당 30
 
 	UPROPERTY()
-	TMap<FString/*key*/, int/*개수*/> ChampionPool2Cost; // 챔피언당 15
+	TMap<FString/*key*/, FChampionKeyArr> ChampionPool2Cost; // 챔피언당 15
 
 	UPROPERTY()
-	TMap<FString/*key*/, int/*개수*/> ChampionPool3Cost; // 챔피언당 10
+	TMap<FString/*key*/, FChampionKeyArr> ChampionPool3Cost; // 챔피언당 10
 };

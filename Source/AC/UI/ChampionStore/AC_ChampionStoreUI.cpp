@@ -65,11 +65,11 @@ void UAC_ChampionStoreUI::InitStoreUI()
 
 void UAC_ChampionStoreUI::SetChampionCards()
 {
-	ChampionCard1->SetChampionCardUI(GetGameMaster()->PickAtRandomChampionCardName());
-	ChampionCard2->SetChampionCardUI(GetGameMaster()->PickAtRandomChampionCardName());
-	ChampionCard3->SetChampionCardUI(GetGameMaster()->PickAtRandomChampionCardName());
-	ChampionCard4->SetChampionCardUI(GetGameMaster()->PickAtRandomChampionCardName());
-	ChampionCard5->SetChampionCardUI(GetGameMaster()->PickAtRandomChampionCardName());
+	ChampionCard1->SetChampionCardUI(GetGameMaster()->PickChampionCardRandomlyUsingKey());
+	ChampionCard2->SetChampionCardUI(GetGameMaster()->PickChampionCardRandomlyUsingKey());
+	ChampionCard3->SetChampionCardUI(GetGameMaster()->PickChampionCardRandomlyUsingKey());
+	ChampionCard4->SetChampionCardUI(GetGameMaster()->PickChampionCardRandomlyUsingKey());
+	ChampionCard5->SetChampionCardUI(GetGameMaster()->PickChampionCardRandomlyUsingKey());
 }
 
 void UAC_ChampionStoreUI::OnClickedIsLockedButton()

@@ -14,6 +14,9 @@ struct FChampionInfo
 public:
 	// Value Info
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FString Key = FString();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FString ChampionName = FString();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -54,7 +57,7 @@ class AC_API UAC_ChampionInfo : public UDataAsset
 	GENERATED_BODY()
 	
 public:
-	FChampionInfo FindChampionInfoForChampionName(const FString& championName, bool bLogNotFound = false);
+	FChampionInfo FindChampionInfoForKey(const FString& key, bool bLogNotFound = false);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<FChampionInfo> ChampionInfoArr;

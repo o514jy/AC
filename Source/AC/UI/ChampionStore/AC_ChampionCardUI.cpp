@@ -26,10 +26,10 @@ void UAC_ChampionCardUI::NativeConstruct()
 		BuyChampionButton->OnClicked.AddDynamic(this, &UAC_ChampionCardUI::OnClickedBuyChampionButton);
 }
 
-void UAC_ChampionCardUI::SetChampionCardUI(FString championName)
+void UAC_ChampionCardUI::SetChampionCardUI(FString key)
 {
-	FChampionInfo info = UAC_FunctionLibrary::GetDataManager(GetWorld())->GetChampionInfo()->FindChampionInfoForChampionName(championName);
-	
+	FChampionInfo info = UAC_FunctionLibrary::GetDataManager(GetWorld())->GetChampionInfo()->FindChampionInfoForKey(key);
+	Key = info.Key;
 	EthnicSynergyText->SetText(FText::FromString(info.Ethnic));
 	OccupationSynergyText->SetText(FText::FromString(info.Occupation));
 	ChampionNameText->SetText(FText::FromString(info.ChampionName));
@@ -44,7 +44,7 @@ void UAC_ChampionCardUI::OnClickedBuyChampionButton()
 
 	SetVisibility(ESlateVisibility::Hidden);
 	
-	GetGameMaster()->SellingChampionForName(ChampionNameText->GetText().ToString(), ChampionCost);
+	GetGameMaster()->SellChampionCardUsingKey(Key, ChampionCost);
 
 }
 

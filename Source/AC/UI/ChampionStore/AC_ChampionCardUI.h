@@ -23,7 +23,7 @@ public:
 
 	virtual void NativeConstruct() override;
 	
-	void SetChampionCardUI(FString championName);
+	void SetChampionCardUI(FString key);
 
 private:
 	// button event
@@ -60,4 +60,6 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> ChampionCostText;
+
+	FString Key;
 };
