@@ -51,10 +51,16 @@ public:
 	void SetPossessionGoldText(int gold);
 
 	UFUNCTION()
-	void SetSellingOverlayAndPrice(bool visible, int price);
+	void SetSellingButtonAndPrice(bool visible, int price);
+
+	UFUNCTION()
+	void SetbIsLocked(bool IsLocked);
 
 	UFUNCTION()
 	bool GetbIsLocked();
+
+	UFUNCTION()
+	bool GetSellingButtonVisible();
 
 private:
 	// button event
@@ -66,9 +72,6 @@ private:
 
 	UFUNCTION()
 	void OnClickedReRollButton();
-
-	UFUNCTION()
-	void SetbIsLocked(bool IsLocked);
 	
 	//temp
 public:
@@ -123,7 +126,9 @@ private:
 	TObjectPtr<UAC_ChampionCardUI> ChampionCard5;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UOverlay> SellingOverlay;
+	TObjectPtr<UButton> SellingButton;
+	bool bSellingButtonVisible = false;
+	bool sellCondition = false;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> SellingPriceText;

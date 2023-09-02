@@ -7,6 +7,7 @@
 #include "AC_EnvObject.generated.h"
 
 class AStaticMeshActor;
+class ANiagaraActor;
 
 UCLASS()
 class AC_API AAC_EnvObject : public AActor
@@ -35,6 +36,8 @@ public:
 
 	TObjectPtr<AStaticMeshActor> GetItemSeat();
 
+	TArray<TObjectPtr<ANiagaraActor>> GetFire();
+
 private:
 	UPROPERTY()
 	TArray<TObjectPtr<AActor>> arrOutActors;
@@ -50,4 +53,7 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<AStaticMeshActor> SM_ItemSeat;
+
+	UPROPERTY()
+	TArray<TObjectPtr<ANiagaraActor>> NS_Fire;
 };

@@ -63,6 +63,8 @@ public:
 	void SetWaitingChampionArr(const FString& key, int index);
 	TArray<FString> GetWaitingChampionArr();
 
+	void ActivateInterestFire();
+
 private:
 	FTacticianStat TacticianStat;
 

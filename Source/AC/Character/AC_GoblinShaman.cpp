@@ -3,3 +3,12 @@
 
 #include "Character/AC_GoblinShaman.h"
 
+void AAC_GoblinShaman::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
+void AAC_GoblinShaman::InitChampionStat()
+{
+	Super::InitChampionStat();
+}

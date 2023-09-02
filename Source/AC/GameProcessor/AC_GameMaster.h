@@ -8,6 +8,7 @@
 
 struct FChampionInfo;
 class AAC_Tactician;
+class IAC_TargetInterface;
 
 USTRUCT(BlueprintType)
 struct FChampionKeyArr
@@ -42,6 +43,9 @@ public:
 	FString FindSpecificKey(FRandomStream RS, TMap<FString, FChampionKeyArr> championPool);
 
 	AAC_Tactician* GetTactician();
+
+	UFUNCTION()
+	void ResellChampionCardUsingKey(const FString& key);
 	
 	bool SellChampionCardUsingKey(FString key, int championCost);
 	bool FindAndPlaceEmptySeat(FString key, TMap<FString, FChampionKeyArr>& championPool);

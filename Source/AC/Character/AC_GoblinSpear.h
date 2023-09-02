@@ -16,4 +16,9 @@ class AC_API AAC_GoblinSpear : public AAC_Champion
 		
 public:
 	AAC_GoblinSpear();
+
+public:
+	virtual void BeginPlay() override;
+
+	virtual void InitChampionStat() override;
 };

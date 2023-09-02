@@ -8,6 +8,7 @@
 #include "InputActionValue.h"
 #include "AC_PlayerController.generated.h"
 
+DECLARE_DELEGATE_OneParam(FDele_ResellToStore, const FString&);
 
 class UNiagaraSystem;
 class USplineComponent;
@@ -54,6 +55,9 @@ public:
 	bool bAutoRunning = false; // 목적지를 향해 가고있는 상태인지
 	void AutoRun();
 
+	FDele_ResellToStore ResellToStore;
+	bool bCheckMousePositionOnStore();
+
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */
 	//uint32 bMoveToMouseCursor : 1;
@@ -80,7 +84,7 @@ private:
 	void TickPickingObject();
 	void PickingObject();
 	IAC_TargetInterface* PickedActor;
-
+		
 private:
 	FVector CachedDestination;
 

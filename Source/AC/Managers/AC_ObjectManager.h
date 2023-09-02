@@ -39,13 +39,15 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 public:
-	AAC_ObjectBase* FindObject(const FString& Key);
-	AAC_ObjectBase* FindCharacter(const FString& Key);
+	AAC_ObjectBase* FindObject(const FString& key);
+	AAC_Champion* FindChampion(const FString& key);
 
-	void SetObjectOnOff(const FString& Key, bool flag);
+	void SetObjectOnOff(const FString& key, bool flag);
 
 	void AddObject(AAC_ObjectBase* object);
 	void AddAndSpawnCharacter(const FString& key, FVector location = FVector(0, 0, 0), FRotator rotation = FRotator(0, 0, 0), FActorSpawnParameters spawnParams = FActorSpawnParameters());
+
+	void DestroyChampion(const FString& key);
 
 	TObjectPtr<AAC_EnvObject> GetEnvObject();
 

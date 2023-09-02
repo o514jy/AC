@@ -3,3 +3,13 @@
 
 #include "Character/AC_DemonDark.h"
 
+
+void AAC_DemonDark::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
+void AAC_DemonDark::InitChampionStat()
+{
+	Super::InitChampionStat();
+}

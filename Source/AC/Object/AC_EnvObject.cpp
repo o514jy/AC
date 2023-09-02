@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/StaticMeshActor.h"
 #include "AC/Enum/AC_Enum.h"
+#include "NiagaraActor.h"
 
 // Sets default values
 AAC_EnvObject::AAC_EnvObject()
@@ -29,6 +30,8 @@ void AAC_EnvObject::BeginPlay()
 	GetArena();
 
 	GetItemSeat();
+
+	GetFire();
 }
 
 // Called every frame
@@ -141,6 +144,48 @@ TObjectPtr<AStaticMeshActor> AAC_EnvObject::GetItemSeat()
 	}
 
 	return SM_ItemSeat;
+}
+
+TArray<TObjectPtr<ANiagaraActor>> AAC_EnvObject::GetFire()
+{
+	if (NS_Fire.IsEmpty() == true)
+	{
+		NS_Fire.Init(nullptr, 5);
+		for (int i = 0; i < arrOutActors.Num(); i++)
+		{
+			if (arrOutActors[i]->GetActorLabel() == TEXT("NS_Fire1"))
+			{
+				ANiagaraActor* fire1 = Cast<ANiagaraActor>(arrOutActors[i]);
+				NS_Fire[Def_NS_Fire1] = fire1;
+			}
+
+			if (arrOutActors[i]->GetActorLabel() == TEXT("NS_Fire2"))
+			{
+				ANiagaraActor* fire2 = Cast<ANiagaraActor>(arrOutActors[i]);
+				NS_Fire[Def_NS_Fire2] = fire2;
+			}
+
+			if (arrOutActors[i]->GetActorLabel() == TEXT("NS_Fire3"))
+			{
+				ANiagaraActor* fire3 = Cast<ANiagaraActor>(arrOutActors[i]);
+				NS_Fire[Def_NS_Fire3] = fire3;
+			}
+
+			if (arrOutActors[i]->GetActorLabel() == TEXT("NS_Fire4"))
+			{
+				ANiagaraActor* fire4 = Cast<ANiagaraActor>(arrOutActors[i]);
+				NS_Fire[Def_NS_Fire4] = fire4;
+			}
+
+			if (arrOutActors[i]->GetActorLabel() == TEXT("NS_Fire5"))
+			{
+				ANiagaraActor* fire5 = Cast<ANiagaraActor>(arrOutActors[i]);
+				NS_Fire[Def_NS_Fire5] = fire5;
+			}
+		}
+	}
+
+	return NS_Fire;
 }
 
 

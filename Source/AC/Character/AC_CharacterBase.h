@@ -26,11 +26,14 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	const FString& GetObjectKey() { return Key; }
+	void SetObjectKey(const FString& key) { Key = key; }
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat")
 	TObjectPtr<USkeletalMeshComponent> Weapon;
 
-	const FString& GetObjectKey() { return Key; }
+
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true))

@@ -107,20 +107,25 @@ void AAC_ObjectManager::Tick(float DeltaTime)
 
 }
 
-AAC_ObjectBase* AAC_ObjectManager::FindObject(const FString& Key)
+AAC_ObjectBase* AAC_ObjectManager::FindObject(const FString& key)
 {
-	if (ObjectMap.Find(Key) == nullptr)
+	if (ObjectMap.Contains(key) == false)
 		return nullptr;
 
-	return ObjectMap[Key];
+	return ObjectMap[key];
 }
 
-AAC_ObjectBase* AAC_ObjectManager::FindCharacter(const FString& Key)
+AAC_Champion* AAC_ObjectManager::FindChampion(const FString& key)
 {
-	return nullptr;
+	if (ChampionMap.Contains(key) == false)
+	{
+		return nullptr;
+	}
+
+	return ChampionMap[key];
 }
 
-void AAC_ObjectManager::SetObjectOnOff(const FString& Key, bool flag)
+void AAC_ObjectManager::SetObjectOnOff(const FString& key, bool flag)
 {
 
 }
@@ -134,54 +139,45 @@ void AAC_ObjectManager::AddAndSpawnCharacter(const FString& key, FVector locatio
 {
 	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	
+	AAC_Champion* actor = nullptr;
+
 	if (key.Contains(TEXT("DemonDark")))
-	{
-		AAC_Champion* actor = (AAC_Champion*)GetWorld()->SpawnActor<AAC_DemonDark>(DemonDarkClass, location, rotation, spawnParams);
-		ChampionMap.Add(key, actor);
-		return;
-	}
+		actor = (AAC_Champion*)GetWorld()->SpawnActor<AAC_DemonDark>(DemonDarkClass, location, rotation, spawnParams);
 
 	if (key.Contains(TEXT("DemonRed")))
-	{
-		AAC_Champion* actor = (AAC_Champion*)GetWorld()->SpawnActor<AAC_DemonRed>(DemonRedClass, location, rotation, spawnParams);
-		ChampionMap.Add(key, actor);
-		return;
-	}
+		actor = (AAC_Champion*)GetWorld()->SpawnActor<AAC_DemonRed>(DemonRedClass, location, rotation, spawnParams);
 
 	if (key.Contains(TEXT("GhoulAbyss")))
-	{
-		AAC_Champion* actor = (AAC_Champion*)GetWorld()->SpawnActor<AAC_GhoulAbyss>(GhoulAbyssClass, location, rotation, spawnParams);
-		ChampionMap.Add(key, actor);
-		return;
-	}
+		actor = (AAC_Champion*)GetWorld()->SpawnActor<AAC_GhoulAbyss>(GhoulAbyssClass, location, rotation, spawnParams);
 
 	if (key.Contains(TEXT("GoblinShaman")))
-	{
-		AAC_Champion* actor = (AAC_Champion*)GetWorld()->SpawnActor<AAC_GoblinShaman>(GoblinShamanClass, location, rotation, spawnParams);
-		ChampionMap.Add(key, actor);
-		return;
-	}
+		actor = (AAC_Champion*)GetWorld()->SpawnActor<AAC_GoblinShaman>(GoblinShamanClass, location, rotation, spawnParams);
 
 	if (key.Contains(TEXT("GoblinSlingshot")))
-	{
-		AAC_Champion* actor = (AAC_Champion*)GetWorld()->SpawnActor<AAC_GoblinSlingshot>(GoblinSlingshotClass, location, rotation, spawnParams);
-		ChampionMap.Add(key, actor);
-		return;
-	}
+		actor = (AAC_Champion*)GetWorld()->SpawnActor<AAC_GoblinSlingshot>(GoblinSlingshotClass, location, rotation, spawnParams);
 
 	if (key.Contains(TEXT("GoblinSpear")))
-	{
-		AAC_Champion* actor = (AAC_Champion*)GetWorld()->SpawnActor<AAC_GoblinSpear>(GoblinSpearClass, location, rotation, spawnParams);
-		ChampionMap.Add(key, actor);
-		return;
-	}
+		actor = (AAC_Champion*)GetWorld()->SpawnActor<AAC_GoblinSpear>(GoblinSpearClass, location, rotation, spawnParams);
 
 	if (key.Contains(TEXT("ShroomPoison")))
+		actor = (AAC_Champion*)GetWorld()->SpawnActor<AAC_ShroomPoison>(ShroomPoisonClass, location, rotation, spawnParams);
+
+	if (actor != nullptr)
 	{
-		AAC_Champion* actor = (AAC_Champion*)GetWorld()->SpawnActor<AAC_ShroomPoison>(ShroomPoisonClass, location, rotation, spawnParams);
+		actor->SetObjectKey(key);
+		actor->InitChampionStat();
 		ChampionMap.Add(key, actor);
-		return;
 	}
+}
+
+void AAC_ObjectManager::DestroyChampion(const FString& key)
+{
+	if (ChampionMap.Contains(key) == false)
+		return;
+
+	AAC_Champion* erasedChamp = ChampionMap[key];
+	ChampionMap.Remove(key);
+	erasedChamp->Destroy();
 }
 
 TObjectPtr<AAC_EnvObject> AAC_ObjectManager::GetEnvObject()

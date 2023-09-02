@@ -41,6 +41,8 @@ void UAC_ChampionStoreUI::InitStoreUI()
 {
 	SetChampionCards();
 
+	//SellingButton->SetVisibility(ESlateVisibility::Hidden);
+
 	FTacticianStat tacticianStat = GetGameMaster()->GetTactician()->GetTacticianStat();
 
 	int currLevel = tacticianStat.Level;
@@ -164,20 +166,39 @@ void UAC_ChampionStoreUI::SetPossessionGoldText(int gold)
 	PossessionGoldText->SetText(FText::FromString(FString::FromInt(gold)));
 }
 
-void UAC_ChampionStoreUI::SetSellingOverlayAndPrice(bool visible, int price)
+void UAC_ChampionStoreUI::SetSellingButtonAndPrice(bool visible, int price)
 {
 	if (visible == true)
 	{
-		SellingOverlay->SetVisibility(ESlateVisibility::HitTestInvisible);
+		SellingButton->SetVisibility(ESlateVisibility::HitTestInvisible);
+		bSellingButtonVisible = true;
 		SellingPriceText->SetText(FText::FromString(FString::FromInt(price)));
+
+		ChampionCard1->SetVisibility(ESlateVisibility::Hidden);
+		ChampionCard2->SetVisibility(ESlateVisibility::Hidden);
+		ChampionCard3->SetVisibility(ESlateVisibility::Hidden);
+		ChampionCard4->SetVisibility(ESlateVisibility::Hidden);
+		ChampionCard5->SetVisibility(ESlateVisibility::Hidden);
 	}
 	else
 	{
-		SellingOverlay->SetVisibility(ESlateVisibility::Hidden);
+		SellingButton->SetVisibility(ESlateVisibility::Hidden);
+		bSellingButtonVisible = false;
+
+		ChampionCard1->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		ChampionCard2->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		ChampionCard3->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		ChampionCard4->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		ChampionCard5->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	}
 }
 
 bool UAC_ChampionStoreUI::GetbIsLocked()
 {
 	return bIsLocked;
+}
+
+bool UAC_ChampionStoreUI::GetSellingButtonVisible()
+{
+	return bSellingButtonVisible;
 }

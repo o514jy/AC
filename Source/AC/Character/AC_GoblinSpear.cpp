@@ -7,3 +7,13 @@ AAC_GoblinSpear::AAC_GoblinSpear()
 {
 
 }
+
+void AAC_GoblinSpear::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
+void AAC_GoblinSpear::InitChampionStat()
+{
+	Super::InitChampionStat();
+}

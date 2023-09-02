@@ -33,5 +33,11 @@ enum class EUIType : uint8
 #define Def_ArenaRightDown 2
 #define Def_ArenaRightUp 3
 
+#define Def_NS_Fire1 0
+#define Def_NS_Fire2 1
+#define Def_NS_Fire3 2
+#define Def_NS_Fire4 3
+#define Def_NS_Fire5 4
+
 
 

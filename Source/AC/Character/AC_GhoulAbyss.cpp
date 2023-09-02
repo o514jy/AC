@@ -3,3 +3,12 @@
 
 #include "Character/AC_GhoulAbyss.h"
 
+void AAC_GhoulAbyss::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
+void AAC_GhoulAbyss::InitChampionStat()
+{
+	Super::InitChampionStat();
+}

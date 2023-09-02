@@ -3,3 +3,12 @@
 
 #include "Character/AC_GoblinSlingshot.h"
 
+void AAC_GoblinSlingshot::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
+void AAC_GoblinSlingshot::InitChampionStat()
+{
+	Super::InitChampionStat();
+}

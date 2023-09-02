@@ -37,7 +37,7 @@ public:
 	int ChampionCost;
 
 	UPROPERTY()
-	int StarLevel;
+	int ChampionStarLevel;
 
 	UPROPERTY()
 	FString Ethnic;
@@ -59,8 +59,14 @@ public:
 	virtual void HighlightActor() override;
 	virtual void UnHighlightActor() override;
 
+	virtual void InitChampionStat();
+
+	FChampionStat GetChampionStat() { return ChampionStat; }
+
 protected:
 	UPROPERTY(BlueprintReadOnly)
 	bool bHighlighted = false;
+
+	FChampionStat ChampionStat;
 
 };

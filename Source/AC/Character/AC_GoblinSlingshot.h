@@ -15,4 +15,7 @@ class AC_API AAC_GoblinSlingshot : public AAC_Champion
 	GENERATED_BODY()
 		
 public:
+	virtual void BeginPlay() override;
+
+	virtual void InitChampionStat() override;
 };

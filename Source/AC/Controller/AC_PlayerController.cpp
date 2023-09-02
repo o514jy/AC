@@ -13,9 +13,15 @@
 #include "Components/SplineComponent.h"
 #include "Math/UnrealMathUtility.h"
 #include "../Interface/AC_TargetInterface.h"
+#include "AC/Character/AC_Champion.h"
+// Manager
+#include "AC/Managers/AC_ObjectManager.h"
 #include "AC/Managers/AC_UIManager.h"
-#include "AC/UI/ChampionStore/AC_ChampionStoreUI.h"
 #include "AC/Library/AC_FunctionLibrary.h"
+// UI
+#include "AC/UI/ChampionStore/AC_ChampionStoreUI.h"
+
+#include "Engine/GameViewportClient.h"
 
 AAC_PlayerController::AAC_PlayerController()
 {
@@ -23,7 +29,7 @@ AAC_PlayerController::AAC_PlayerController()
 	DefaultMouseCursor = EMouseCursor::Default;
 	CachedDestination = FVector::ZeroVector;
 	FollowTime = 0.f;
-	ShortPressThreshold = 0.3f;
+	ShortPressThreshold = 0.2f;
 
 	Spline = CreateDefaultSubobject<USplineComponent>("Spline");
 }
@@ -45,6 +51,37 @@ void AAC_PlayerController::AutoRun()
 			bAutoRunning = false;
 		}
 	}
+}
+
+bool AAC_PlayerController::bCheckMousePositionOnStore()
+{
+	if (PickedActor == nullptr)
+		return false;
+
+	FHitResult Hit;
+	bool bHitSuccessful = GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, true, Hit);
+
+	FVector2D ScreenLocation;
+	ProjectWorldLocationToScreen(Hit.Location, ScreenLocation);
+
+	int32 ScreenWidth = 0;
+	int32 ScreenHeight = 0;
+	GetViewportSize(ScreenWidth, ScreenHeight);
+
+	int32 absoluteScreenX = (int32)ScreenLocation.X * 1980 / ScreenWidth;
+	int32 absoluteScreenY = (int32)ScreenLocation.Y * 1080 / ScreenHeight;
+
+	// 550 1520 상점 ui 직접잰거
+	// 921 1080
+
+	if (absoluteScreenX >= 550 && absoluteScreenX <= 1520 && absoluteScreenY >= 920 && absoluteScreenY <= 1080)
+	{
+		ResellToStore.ExecuteIfBound(Cast<AAC_Champion>(PickedActor)->GetObjectKey());
+	}
+
+	Cast<UAC_ChampionStoreUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::ChampionStoreUI))->SetSellingButtonAndPrice(false, 0);
+
+	return true;
 }
 
 void AAC_PlayerController::SetupInputComponent()
@@ -79,6 +116,10 @@ void AAC_PlayerController::BeginPlay()
 	{
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 	}
+
+	FInputModeGameAndUI inputmode = FInputModeGameAndUI();
+	inputmode.SetHideCursorDuringCapture(false);
+	SetInputMode(inputmode);
 }
 
 void AAC_PlayerController::PlayerTick(float DeltaTime)
@@ -167,7 +208,6 @@ void AAC_PlayerController::OnSetLeftMouseButtonTriggered()
 
 void AAC_PlayerController::OnSetLeftMouseButtonReleased()
 {
-
 	if (FollowTime <= ShortPressThreshold)
 	{
 		if (bIsPicked == false)
@@ -176,15 +216,15 @@ void AAC_PlayerController::OnSetLeftMouseButtonReleased()
 		}
 		else
 		{
+			bCheckMousePositionOnStore();
 			bIsPicked = false;
 			PickedActor = nullptr;
-			Cast<UAC_ChampionStoreUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::ChampionStoreUI))->SetSellingOverlayAndPrice(false, 1);
 		}
 	}
 	else
 	{
+		bCheckMousePositionOnStore();
 		PickedActor = nullptr;
-		Cast<UAC_ChampionStoreUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::ChampionStoreUI))->SetSellingOverlayAndPrice(false, 1);
 	}
 
 	FollowTime = 0.f;
@@ -241,10 +281,15 @@ void AAC_PlayerController::TickPickingObject()
 
 void AAC_PlayerController::PickingObject()
 {
-	Cast<UAC_ChampionStoreUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::ChampionStoreUI))->SetSellingOverlayAndPrice(true, 1);
+	UAC_ChampionStoreUI* championStoreUI = Cast<UAC_ChampionStoreUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::ChampionStoreUI));
+	AAC_Champion* pickedChampion = Cast<AAC_Champion>(PickedActor);
+
+	if (championStoreUI->GetSellingButtonVisible() == false)
+	{
+		championStoreUI->SetSellingButtonAndPrice(true, pickedChampion->GetChampionStat().ChampionCost);
+	}
 
 	FHitResult CursorHit;
-	//FHitResult CursorHitTemp;
 
 	// GameTraceChannel3 = TraceFloor
 	GetHitResultUnderCursor(ECollisionChannel::ECC_GameTraceChannel3, false, CursorHit);
@@ -253,7 +298,6 @@ void AAC_PlayerController::PickingObject()
 	// 커서에 캐릭터 붙이기
 	APawn* PickedPawn = Cast<APawn>(PickedActor);
 	FVector LocationXYZ = CursorHit.Location;
-	//FVector LocationXYZTemp = CursorHitTemp.Location;
 	LocationXYZ.Z = PickedPawn->GetActorLocation().Z;
 	PickedPawn->SetActorLocation(LocationXYZ);
 }

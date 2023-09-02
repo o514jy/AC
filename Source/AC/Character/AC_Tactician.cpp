@@ -3,12 +3,16 @@
 
 #include "Character/AC_Tactician.h"
 #include "Components/CapsuleComponent.h"
-
+#include "AC/Data/AC_TacticianXpInfo.h"
+#include "AC/Enum/AC_Enum.h"
+// Manager
 #include "AC/Library/AC_FunctionLibrary.h"
 #include "AC/Managers/AC_UIManager.h"
 #include "AC/Managers/AC_DataManager.h"
-#include "AC/Data/AC_TacticianXpInfo.h"
-#include "AC/Enum/AC_Enum.h"
+#include "AC/Managers/AC_ObjectManager.h"
+// Object & Niagara
+#include "AC/Object/AC_EnvObject.h"
+#include "NiagaraActor.h"
 
 AAC_Tactician::AAC_Tactician()
 {
@@ -96,12 +100,16 @@ void AAC_Tactician::SetPossessionGold(int gold)
 {
 	TacticianStat.PossessionGold = gold;
 	Cast<UAC_ChampionStoreUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::ChampionStoreUI))->SetPossessionGoldText(gold);
+
+	ActivateInterestFire();
 }
 
 void AAC_Tactician::AddPossessionGold(int addGold)
 {
 	TacticianStat.PossessionGold += addGold;
 	Cast<UAC_ChampionStoreUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::ChampionStoreUI))->SetPossessionGoldText(TacticianStat.PossessionGold);
+	
+	ActivateInterestFire();
 }
 
 bool AAC_Tactician::SubPossessionGold(int subGold)
@@ -111,6 +119,8 @@ bool AAC_Tactician::SubPossessionGold(int subGold)
 
 	TacticianStat.PossessionGold -= subGold;
 	Cast<UAC_ChampionStoreUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::ChampionStoreUI))->SetPossessionGoldText(TacticianStat.PossessionGold);
+
+	ActivateInterestFire();
 
 	return true;
 }
@@ -123,4 +133,35 @@ void AAC_Tactician::SetWaitingChampionArr(const FString& key, int index)
 TArray<FString> AAC_Tactician::GetWaitingChampionArr()
 {
 	return WaitingChampionArr;
+}
+
+void AAC_Tactician::ActivateInterestFire()
+{
+	AAC_EnvObject* envObject = UAC_FunctionLibrary::GetObjectManager(GetWorld())->GetEnvObject();
+	TArray<ANiagaraActor*> fireArr = envObject->GetFire();
+	
+	if (TacticianStat.PossessionGold >= 10)
+		fireArr[Def_NS_Fire1]->SetActorHiddenInGame(false);
+	else
+		fireArr[Def_NS_Fire1]->SetActorHiddenInGame(true);
+
+	if (TacticianStat.PossessionGold >= 20)
+		fireArr[Def_NS_Fire2]->SetActorHiddenInGame(false);
+	else
+		fireArr[Def_NS_Fire2]->SetActorHiddenInGame(true);
+
+	if (TacticianStat.PossessionGold >= 30)
+		fireArr[Def_NS_Fire3]->SetActorHiddenInGame(false);
+	else
+		fireArr[Def_NS_Fire3]->SetActorHiddenInGame(true);
+
+	if (TacticianStat.PossessionGold >= 40)
+		fireArr[Def_NS_Fire4]->SetActorHiddenInGame(false);
+	else
+		fireArr[Def_NS_Fire4]->SetActorHiddenInGame(true);
+
+	if (TacticianStat.PossessionGold >= 50)
+		fireArr[Def_NS_Fire5]->SetActorHiddenInGame(false);
+	else
+		fireArr[Def_NS_Fire5]->SetActorHiddenInGame(true);
 }
