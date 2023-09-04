@@ -4,6 +4,7 @@
 #include "Character/AC_Champion.h"
 #include "Components/CapsuleComponent.h"
 #include "AC/Data/AC_ChampionInfo.h"
+#include "GameFramework/CharacterMovementComponent.h"
 // Manager
 #include "AC/Managers/AC_DataManager.h"
 #include "AC/Library/AC_FunctionLibrary.h"
@@ -11,6 +12,15 @@
 AAC_Champion::AAC_Champion()
 {
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Champion"));
+
+	GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+
+	// Set an initial velocity to make the Character fall
+	//FVector initialVelocity = FVector(0.0f, 0.0f, -1000.0f);
+	//GetCharacterMovement()->Velocity = initialVelocity;
+	//GetCharacterMovement()->GravityScale = 1.0f;
+
+	//GetCapsuleComponent()->SetSimulatePhysics(true);
 }
 
 void AAC_Champion::BeginPlay()

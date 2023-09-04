@@ -12,7 +12,12 @@
 #include "AC/Managers/AC_ObjectManager.h"
 // Object & Niagara
 #include "AC/Object/AC_EnvObject.h"
+#include "Engine/StaticMeshActor.h"
 #include "NiagaraActor.h"
+// Placeable
+#include "AC/Object/AC_PlaceableWaitingSeat1234.h"
+#include "AC/Object/AC_PlaceableWaitingSeat5678.h"
+
 
 AAC_Tactician::AAC_Tactician()
 {
@@ -22,6 +27,14 @@ AAC_Tactician::AAC_Tactician()
 
 	WaitingChampionArr.Init(FString(), 8);
 	ArenaChampionArr.Init(FString(), 32);
+}
+
+void AAC_Tactician::BeginPlay()
+{
+	Super::BeginPlay();
+
+	GetPlaceableObject1x4ForWaitingSeat1234();
+	GetPlaceableObject1x4ForWaitingSeat5678();
 }
 
 FTacticianStat AAC_Tactician::GetTacticianStat()
@@ -70,6 +83,7 @@ void AAC_Tactician::addXp(int addXp)
 				SetXp(0);
 				SetLevel(nextLevel);
 				SetMaxXp(1);
+				Cast<UAC_ChampionStoreUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::ChampionStoreUI))->SetTacticianXpProgressBar((float)TacticianStat.Xp / TacticianStat.maxXp);
 				return;
 			}
 			
@@ -86,6 +100,7 @@ void AAC_Tactician::addXp(int addXp)
 				SetXp(restXp);
 				SetLevel(nextLevel);
 				SetMaxXp(nextLevel);
+				Cast<UAC_ChampionStoreUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::ChampionStoreUI))->SetTacticianXpProgressBar((float)TacticianStat.Xp / TacticianStat.maxXp);
 				return;
 			}
 		}
@@ -93,6 +108,7 @@ void AAC_Tactician::addXp(int addXp)
 	else
 	{
 		SetXp(TacticianStat.Xp + addXp);
+		Cast<UAC_ChampionStoreUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::ChampionStoreUI))->SetTacticianXpProgressBar((float)TacticianStat.Xp / TacticianStat.maxXp);
 	}
 }
 
@@ -133,6 +149,38 @@ void AAC_Tactician::SetWaitingChampionArr(const FString& key, int index)
 TArray<FString> AAC_Tactician::GetWaitingChampionArr()
 {
 	return WaitingChampionArr;
+}
+
+TObjectPtr<AAC_ObjectBase> AAC_Tactician::GetPlaceableObject1x4ForWaitingSeat1234()
+{
+	if (PlaceableObject1x4ForWaitingSeat1234 == nullptr)
+	{
+		const FString key = GetObjectKey() + TEXT("PlaceableObject1x4ForWaitingSeat1234");
+		FVector loc = UAC_FunctionLibrary::GetObjectManager(GetWorld())->GetEnvObject()->GetWaitingSeat()[Def_WaitingSeat1234]->GetActorLocation();
+		loc.X += 50.f;
+		loc.Y += 200.f;
+		loc.Z += 12.5f;
+		UAC_FunctionLibrary::GetObjectManager(GetWorld())->AddAndSpawnObject(key, loc, FRotator(), FActorSpawnParameters());
+		UAC_FunctionLibrary::GetObjectManager(GetWorld())->SetObjectOnOff(key, false);
+		PlaceableObject1x4ForWaitingSeat1234 = Cast<AAC_ObjectBase>(UAC_FunctionLibrary::GetObjectManager(GetWorld())->FindObject(key));
+	}
+	return PlaceableObject1x4ForWaitingSeat1234;
+}
+
+TObjectPtr<AAC_ObjectBase> AAC_Tactician::GetPlaceableObject1x4ForWaitingSeat5678()
+{
+	if (PlaceableObject1x4ForWaitingSeat5678 == nullptr)
+	{
+		const FString key = GetObjectKey() + TEXT("PlaceableObject1x4ForWaitingSeat5678");
+		FVector loc = UAC_FunctionLibrary::GetObjectManager(GetWorld())->GetEnvObject()->GetWaitingSeat()[Def_WaitingSeat5678]->GetActorLocation();
+		loc.X += 50.f;
+		loc.Y += 200.f;
+		loc.Z += 12.5f;
+		UAC_FunctionLibrary::GetObjectManager(GetWorld())->AddAndSpawnObject(key, loc, FRotator(), FActorSpawnParameters());
+		UAC_FunctionLibrary::GetObjectManager(GetWorld())->SetObjectOnOff(key, false);
+		PlaceableObject1x4ForWaitingSeat5678 = Cast<AAC_ObjectBase>(UAC_FunctionLibrary::GetObjectManager(GetWorld())->FindObject(key));
+	}
+	return PlaceableObject1x4ForWaitingSeat5678;
 }
 
 void AAC_Tactician::ActivateInterestFire()

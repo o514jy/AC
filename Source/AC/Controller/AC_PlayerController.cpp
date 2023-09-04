@@ -14,6 +14,7 @@
 #include "Math/UnrealMathUtility.h"
 #include "../Interface/AC_TargetInterface.h"
 #include "AC/Character/AC_Champion.h"
+#include "AC/Character/AC_Tactician.h"
 // Manager
 #include "AC/Managers/AC_ObjectManager.h"
 #include "AC/Managers/AC_UIManager.h"
@@ -204,6 +205,14 @@ void AAC_PlayerController::OnSetLeftMouseButtonTriggered()
 	{
 		TickPickingObject();
 	}
+
+	if (PickedActor != nullptr)
+	{
+		FString key1 = Cast<AAC_Tactician>(GetCharacter())->GetObjectKey() + TEXT("PlaceableObject1x4ForWaitingSeat1234");
+		FString key2 = Cast<AAC_Tactician>(GetCharacter())->GetObjectKey() + TEXT("PlaceableObject1x4ForWaitingSeat5678");
+		UAC_FunctionLibrary::GetObjectManager(GetWorld())->SetObjectOnOff(key1, true);
+		UAC_FunctionLibrary::GetObjectManager(GetWorld())->SetObjectOnOff(key2, true);
+	}
 }
 
 void AAC_PlayerController::OnSetLeftMouseButtonReleased()
@@ -225,6 +234,14 @@ void AAC_PlayerController::OnSetLeftMouseButtonReleased()
 	{
 		bCheckMousePositionOnStore();
 		PickedActor = nullptr;
+	}
+
+	if (PickedActor == nullptr)
+	{
+		FString key1 = Cast<AAC_Tactician>(GetCharacter())->GetObjectKey() + TEXT("PlaceableObject1x4ForWaitingSeat1234");
+		FString key2 = Cast<AAC_Tactician>(GetCharacter())->GetObjectKey() + TEXT("PlaceableObject1x4ForWaitingSeat5678");
+		UAC_FunctionLibrary::GetObjectManager(GetWorld())->SetObjectOnOff(key1, false);
+		UAC_FunctionLibrary::GetObjectManager(GetWorld())->SetObjectOnOff(key2, false);
 	}
 
 	FollowTime = 0.f;
@@ -257,7 +274,6 @@ void AAC_PlayerController::TickCursorTrace()
 				TargetActor->UnHighlightActor();
 				LocalTargetActor->HighlightActor();
 			}
-
 			// 동일한 애면 무시
 		}
 		else

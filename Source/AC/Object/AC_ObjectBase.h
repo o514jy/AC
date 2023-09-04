@@ -24,6 +24,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	const FString& GetObjectKey() { return Key; }
+	void SetObjectKey(const FString& key) { Key = key; }
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true))

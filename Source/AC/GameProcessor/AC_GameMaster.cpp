@@ -9,6 +9,7 @@
 #include "AC/Data/AC_StoreProbabilityInfo.h"
 #include "AC/Character/AC_Tactician.h"
 #include "AC/Object/AC_EnvObject.h"
+#include "AC/Object/AC_ObjectBase.h"
 #include "AC/Character/AC_Champion.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/StaticMeshActor.h"
@@ -149,6 +150,7 @@ AAC_Tactician* AAC_GameMaster::GetTactician()
 	if (Tactician == nullptr)
 	{
 		Tactician = Cast<AAC_Tactician>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+		Tactician->SetObjectKey(TEXT("Tactician") + FString::Printf(TEXT("%d"), 0));
 	}
 	return Tactician;
 }
@@ -233,21 +235,19 @@ bool AAC_GameMaster::FindAndPlaceEmptySeat(FString key, TMap<FString, FChampionK
 		{
 			sold = true;
 			GetTactician()->SetWaitingChampionArr(inGameKey, i);
-			TArray<AStaticMeshActor*> waitSeatArr = UAC_FunctionLibrary::GetObjectManager(GetWorld())->GetEnvObject()->GetWaitingSeat();
+			AAC_ObjectBase* waitSeat1234 = Cast<AAC_ObjectBase>(GetTactician()->GetPlaceableObject1x4ForWaitingSeat1234());
+			AAC_ObjectBase* waitSeat5678 = Cast<AAC_ObjectBase>(GetTactician()->GetPlaceableObject1x4ForWaitingSeat5678());
 			FVector loc;
 			if (i < 4)
 			{
-				loc = waitSeatArr[Def_WaitingSeat1234]->GetActorLocation();
-				loc.Y += 50.f + 100 * i;
+				loc = waitSeat1234->GetActorLocation();
+				loc.Y += -150.f + i * 100.f;
 			}
 			else
 			{
-				loc = waitSeatArr[Def_WaitingSeat5678]->GetActorLocation();
-				loc.Y += 50.f + 100 * (i - 4);
+				loc = waitSeat5678->GetActorLocation();
+				loc.Y += -150.f + (i - 4) * 100.f;
 			}
-
-			loc.X += 50.f;
-			loc.Z += 50.f;
 
 			UAC_FunctionLibrary::GetObjectManager(GetWorld())->AddAndSpawnCharacter(
 				inGameKey,

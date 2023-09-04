@@ -9,6 +9,7 @@
 class AAC_ObjectBase;
 class AAC_CharacterBase;
 class AAC_Champion;
+class AAC_Tactician;
 class AAC_EnvObject;
 // Ã¨ÇÇ¾ð
 class AAC_DemonDark;
@@ -18,6 +19,9 @@ class AAC_GoblinShaman;
 class AAC_GoblinSlingshot;
 class AAC_GoblinSpear;
 class AAC_ShroomPoison;
+// Ã¨ÇÇ¾ð ¹èÄ¡Å¸ÀÏ
+class AAC_PlaceableWaitingSeat1234;
+class AAC_PlaceableWaitingSeat5678;
 
 UCLASS()
 class AC_API AAC_ObjectManager : public AActor
@@ -41,10 +45,11 @@ public:
 public:
 	AAC_ObjectBase* FindObject(const FString& key);
 	AAC_Champion* FindChampion(const FString& key);
+	AAC_Tactician* FindTactician(const FString& key);
 
-	void SetObjectOnOff(const FString& key, bool flag);
+	bool SetObjectOnOff(const FString& key, bool flag);
 
-	void AddObject(AAC_ObjectBase* object);
+	void AddAndSpawnObject(const FString& key, FVector location, FRotator rotation, FActorSpawnParameters spawnParams);
 	void AddAndSpawnCharacter(const FString& key, FVector location = FVector(0, 0, 0), FRotator rotation = FRotator(0, 0, 0), FActorSpawnParameters spawnParams = FActorSpawnParameters());
 
 	void DestroyChampion(const FString& key);
@@ -54,6 +59,7 @@ public:
 private:
 	TMap<FString/*key*/, AAC_ObjectBase*> ObjectMap;
 	TMap<FString/*key*/, AAC_Champion*> ChampionMap;
+	TMap<FString/*key*/, AAC_Tactician*> TacticianMap;
 	
 	TObjectPtr<AAC_EnvObject> EnvObject;
 
@@ -77,4 +83,7 @@ private:
 
 	UPROPERTY()
 	TSubclassOf<AAC_ShroomPoison> ShroomPoisonClass;
+
+	UPROPERTY()
+	TSubclassOf<AAC_ObjectBase> PlaceableObject1x4Class;
 };

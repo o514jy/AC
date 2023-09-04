@@ -6,6 +6,10 @@
 #include "Character/AC_CharacterBase.h"
 #include "AC_Tactician.generated.h"
 
+class AAC_PlaceableWaitingSeat1234;
+class AAC_PlaceableWaitingSeat5678;
+class AAC_ObjectBase;
+
 USTRUCT(BlueprintType)
 struct FTacticianStat
 {
@@ -32,8 +36,6 @@ public:
 
 	UPROPERTY()
 	float TacticianSizeRatio = 1;
-
-	
 };
 
 UCLASS()
@@ -44,24 +46,27 @@ class AC_API AAC_Tactician : public AAC_CharacterBase
 public:
 	AAC_Tactician();
 
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+public:
+
 	FTacticianStat GetTacticianStat();
 
 	void SetLevel(int level);
-
 	void SetXp(int xp);
-
 	void SetMaxXp(int maxXp);
-
 	void addXp(int addXp);
-
 	void SetPossessionGold(int gold);
-
 	void AddPossessionGold(int addGold);
-
 	bool SubPossessionGold(int subGold);
 
 	void SetWaitingChampionArr(const FString& key, int index);
 	TArray<FString> GetWaitingChampionArr();
+
+	TObjectPtr<AAC_ObjectBase> GetPlaceableObject1x4ForWaitingSeat1234();
+	TObjectPtr<AAC_ObjectBase> GetPlaceableObject1x4ForWaitingSeat5678();
 
 	void ActivateInterestFire();
 
@@ -70,4 +75,7 @@ private:
 
 	TArray<FString/*key*/> WaitingChampionArr;
 	TArray<FString/*Key*/> ArenaChampionArr;
+
+	TObjectPtr<AAC_ObjectBase> PlaceableObject1x4ForWaitingSeat1234;
+	TObjectPtr<AAC_ObjectBase> PlaceableObject1x4ForWaitingSeat5678;
 };
