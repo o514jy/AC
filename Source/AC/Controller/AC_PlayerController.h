@@ -58,6 +58,9 @@ public:
 	FDele_ResellToStore ResellToStore;
 	bool bCheckMousePositionOnStore();
 
+	void SetPlaceableWaitingSeatOnOff(bool flag);
+	void SetPlaceableArenaOnOff(bool flag);
+
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */
 	//uint32 bMoveToMouseCursor : 1;

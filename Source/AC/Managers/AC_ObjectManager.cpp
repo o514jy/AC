@@ -3,8 +3,7 @@
 
 #include "Managers/AC_ObjectManager.h"
 #include "AC/Object/AC_EnvObject.h"
-#include "AC/Object/AC_PlaceableWaitingSeat1234.h"
-#include "AC/Object/AC_PlaceableWaitingSeat5678.h"
+#include "AC/Object/AC_PlaceableObject1x1.h"
 #include "AC/Character/AC_CharacterBase.h"
 #include "AC/Character/AC_DemonDark.h"
 #include "AC/Character/AC_DemonRed.h"
@@ -92,12 +91,12 @@ void AAC_ObjectManager::LoadChampionClass()
 		}
 	}
 
-	if (PlaceableObject1x4Class == nullptr)
+	if (PlaceableObject1x1Class == nullptr)
 	{
-		static ConstructorHelpers::FClassFinder<AAC_ObjectBase> objectAsset(TEXT("Blueprint'/Game/Blueprints/PlaceableObject/BP_PlaceableObject1x4.BP_PlaceableObject1x4_C'"));
+		static ConstructorHelpers::FClassFinder<AAC_PlaceableObject1x1> objectAsset(TEXT("Blueprint'/Game/Blueprints/PlaceableObject/BP_PlaceableObject1x1.BP_PlaceableObject1x1_C'"));
 		if (objectAsset.Succeeded())
 		{
-			PlaceableObject1x4Class = objectAsset.Class;
+			PlaceableObject1x1Class = objectAsset.Class;
 		}
 	}
 }
@@ -161,8 +160,8 @@ void AAC_ObjectManager::AddAndSpawnObject(const FString& key, FVector location, 
 
 	AAC_ObjectBase* actor = nullptr;
 
-	if (key.Contains(TEXT("PlaceableObject1x4")))
-		actor = (AAC_ObjectBase*)GetWorld()->SpawnActor<AAC_ObjectBase>(PlaceableObject1x4Class, location, rotation, spawnParams);
+	if (key.Contains(TEXT("PlaceableObject1x1")))
+		actor = (AAC_ObjectBase*)GetWorld()->SpawnActor<AAC_PlaceableObject1x1>(PlaceableObject1x1Class, location, rotation, spawnParams);
 
 	if (actor != nullptr)
 	{

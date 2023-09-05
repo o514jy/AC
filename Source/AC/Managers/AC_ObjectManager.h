@@ -20,8 +20,7 @@ class AAC_GoblinSlingshot;
 class AAC_GoblinSpear;
 class AAC_ShroomPoison;
 // 챔피언 배치타일
-class AAC_PlaceableWaitingSeat1234;
-class AAC_PlaceableWaitingSeat5678;
+class AAC_PlaceableObject1x1;
 
 UCLASS()
 class AC_API AAC_ObjectManager : public AActor
@@ -85,5 +84,5 @@ private:
 	TSubclassOf<AAC_ShroomPoison> ShroomPoisonClass;
 
 	UPROPERTY()
-	TSubclassOf<AAC_ObjectBase> PlaceableObject1x4Class;
+	TSubclassOf<AAC_PlaceableObject1x1> PlaceableObject1x1Class;
 };

@@ -15,14 +15,16 @@
 #include "../Interface/AC_TargetInterface.h"
 #include "AC/Character/AC_Champion.h"
 #include "AC/Character/AC_Tactician.h"
+#include "Engine/GameViewportClient.h"
 // Manager
 #include "AC/Managers/AC_ObjectManager.h"
 #include "AC/Managers/AC_UIManager.h"
 #include "AC/Library/AC_FunctionLibrary.h"
 // UI
 #include "AC/UI/ChampionStore/AC_ChampionStoreUI.h"
+// Object
+#include "AC/Object/AC_PlaceableObject1x1.h"
 
-#include "Engine/GameViewportClient.h"
 
 AAC_PlayerController::AAC_PlayerController()
 {
@@ -83,6 +85,27 @@ bool AAC_PlayerController::bCheckMousePositionOnStore()
 	Cast<UAC_ChampionStoreUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::ChampionStoreUI))->SetSellingButtonAndPrice(false, 0);
 
 	return true;
+}
+
+void AAC_PlayerController::SetPlaceableWaitingSeatOnOff(bool flag)
+{
+	for (int i = 0; i < 8; i++)
+	{
+		const FString key = Cast<AAC_Tactician>(GetCharacter())->GetObjectKey() + TEXT("PlaceableObject1x1WaitingSeat") + FString::Printf(TEXT("%d"), i + 1);
+		UAC_FunctionLibrary::GetObjectManager(GetWorld())->SetObjectOnOff(key, flag);
+	}
+}
+
+void AAC_PlayerController::SetPlaceableArenaOnOff(bool flag)
+{
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+			const FString key = Cast<AAC_Tactician>(GetCharacter())->GetObjectKey() + TEXT("PlaceableObject1x1Arena") + FString::Printf(TEXT("%d"), i + 1) + FString::Printf(TEXT("%d"), j + 1);
+			UAC_FunctionLibrary::GetObjectManager(GetWorld())->SetObjectOnOff(key, flag);
+		}
+	}
 }
 
 void AAC_PlayerController::SetupInputComponent()
@@ -208,10 +231,8 @@ void AAC_PlayerController::OnSetLeftMouseButtonTriggered()
 
 	if (PickedActor != nullptr)
 	{
-		FString key1 = Cast<AAC_Tactician>(GetCharacter())->GetObjectKey() + TEXT("PlaceableObject1x4ForWaitingSeat1234");
-		FString key2 = Cast<AAC_Tactician>(GetCharacter())->GetObjectKey() + TEXT("PlaceableObject1x4ForWaitingSeat5678");
-		UAC_FunctionLibrary::GetObjectManager(GetWorld())->SetObjectOnOff(key1, true);
-		UAC_FunctionLibrary::GetObjectManager(GetWorld())->SetObjectOnOff(key2, true);
+		SetPlaceableWaitingSeatOnOff(true);
+		SetPlaceableArenaOnOff(true);
 	}
 }
 
@@ -238,10 +259,8 @@ void AAC_PlayerController::OnSetLeftMouseButtonReleased()
 
 	if (PickedActor == nullptr)
 	{
-		FString key1 = Cast<AAC_Tactician>(GetCharacter())->GetObjectKey() + TEXT("PlaceableObject1x4ForWaitingSeat1234");
-		FString key2 = Cast<AAC_Tactician>(GetCharacter())->GetObjectKey() + TEXT("PlaceableObject1x4ForWaitingSeat5678");
-		UAC_FunctionLibrary::GetObjectManager(GetWorld())->SetObjectOnOff(key1, false);
-		UAC_FunctionLibrary::GetObjectManager(GetWorld())->SetObjectOnOff(key2, false);
+		SetPlaceableWaitingSeatOnOff(false);
+		SetPlaceableArenaOnOff(false);
 	}
 
 	FollowTime = 0.f;

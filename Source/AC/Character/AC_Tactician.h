@@ -6,8 +6,7 @@
 #include "Character/AC_CharacterBase.h"
 #include "AC_Tactician.generated.h"
 
-class AAC_PlaceableWaitingSeat1234;
-class AAC_PlaceableWaitingSeat5678;
+class AAC_PlaceableObject1x1;
 class AAC_ObjectBase;
 
 USTRUCT(BlueprintType)
@@ -38,6 +37,20 @@ public:
 	float TacticianSizeRatio = 1;
 };
 
+USTRUCT(BlueprintType)
+struct FPlaceableArenaRowArr
+{
+	GENERATED_BODY()
+
+public:
+	TArray<TObjectPtr<AAC_PlaceableObject1x1>> RowPlaceableArenaArr;
+
+	FPlaceableArenaRowArr()
+	{
+		RowPlaceableArenaArr.Init(nullptr, 8);
+	}
+};
+
 UCLASS()
 class AC_API AAC_Tactician : public AAC_CharacterBase
 {
@@ -65,8 +78,8 @@ public:
 	void SetWaitingChampionArr(const FString& key, int index);
 	TArray<FString> GetWaitingChampionArr();
 
-	TObjectPtr<AAC_ObjectBase> GetPlaceableObject1x4ForWaitingSeat1234();
-	TObjectPtr<AAC_ObjectBase> GetPlaceableObject1x4ForWaitingSeat5678();
+	TArray<TObjectPtr<AAC_PlaceableObject1x1>> GetPlaceableWaitingSeat();
+	TArray<FPlaceableArenaRowArr> GetPlaceableArena();
 
 	void ActivateInterestFire();
 
@@ -76,6 +89,6 @@ private:
 	TArray<FString/*key*/> WaitingChampionArr;
 	TArray<FString/*Key*/> ArenaChampionArr;
 
-	TObjectPtr<AAC_ObjectBase> PlaceableObject1x4ForWaitingSeat1234;
-	TObjectPtr<AAC_ObjectBase> PlaceableObject1x4ForWaitingSeat5678;
+	TArray<TObjectPtr<AAC_PlaceableObject1x1>> PlaceableWaitingSeat;
+	TArray<FPlaceableArenaRowArr> PlaceableArena;
 };

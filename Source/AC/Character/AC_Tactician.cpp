@@ -15,8 +15,7 @@
 #include "Engine/StaticMeshActor.h"
 #include "NiagaraActor.h"
 // Placeable
-#include "AC/Object/AC_PlaceableWaitingSeat1234.h"
-#include "AC/Object/AC_PlaceableWaitingSeat5678.h"
+#include "AC/Object/AC_PlaceableObject1x1.h"
 
 
 AAC_Tactician::AAC_Tactician()
@@ -33,8 +32,8 @@ void AAC_Tactician::BeginPlay()
 {
 	Super::BeginPlay();
 
-	GetPlaceableObject1x4ForWaitingSeat1234();
-	GetPlaceableObject1x4ForWaitingSeat5678();
+	GetPlaceableWaitingSeat();
+	GetPlaceableArena();
 }
 
 FTacticianStat AAC_Tactician::GetTacticianStat()
@@ -151,36 +150,48 @@ TArray<FString> AAC_Tactician::GetWaitingChampionArr()
 	return WaitingChampionArr;
 }
 
-TObjectPtr<AAC_ObjectBase> AAC_Tactician::GetPlaceableObject1x4ForWaitingSeat1234()
+TArray<TObjectPtr<AAC_PlaceableObject1x1>> AAC_Tactician::GetPlaceableWaitingSeat()
 {
-	if (PlaceableObject1x4ForWaitingSeat1234 == nullptr)
+	if (PlaceableWaitingSeat.IsEmpty() == true)
 	{
-		const FString key = GetObjectKey() + TEXT("PlaceableObject1x4ForWaitingSeat1234");
-		FVector loc = UAC_FunctionLibrary::GetObjectManager(GetWorld())->GetEnvObject()->GetWaitingSeat()[Def_WaitingSeat1234]->GetActorLocation();
-		loc.X += 50.f;
-		loc.Y += 200.f;
-		loc.Z += 12.5f;
-		UAC_FunctionLibrary::GetObjectManager(GetWorld())->AddAndSpawnObject(key, loc, FRotator(), FActorSpawnParameters());
-		UAC_FunctionLibrary::GetObjectManager(GetWorld())->SetObjectOnOff(key, false);
-		PlaceableObject1x4ForWaitingSeat1234 = Cast<AAC_ObjectBase>(UAC_FunctionLibrary::GetObjectManager(GetWorld())->FindObject(key));
+		PlaceableWaitingSeat.Init(nullptr, 8);
+		for (int i = 0; i < 8; i++)
+		{
+			const FString key = GetObjectKey() + TEXT("PlaceableObject1x1WaitingSeat") + FString::Printf(TEXT("%d"), i + 1);
+			FVector loc = UAC_FunctionLibrary::GetObjectManager(GetWorld())->GetEnvObject()->GetWaitingSeat()[Def_WaitingSeat1234]->GetActorLocation();
+			loc.X += 50.f;
+			loc.Y += 50.f + i * 100.f;
+			loc.Z += 12.5f;
+			UAC_FunctionLibrary::GetObjectManager(GetWorld())->AddAndSpawnObject(key, loc, FRotator(), FActorSpawnParameters());
+			UAC_FunctionLibrary::GetObjectManager(GetWorld())->SetObjectOnOff(key, false);
+			PlaceableWaitingSeat[i] = Cast<AAC_PlaceableObject1x1>(UAC_FunctionLibrary::GetObjectManager(GetWorld())->FindObject(key));
+		}
 	}
-	return PlaceableObject1x4ForWaitingSeat1234;
+	return PlaceableWaitingSeat;
 }
 
-TObjectPtr<AAC_ObjectBase> AAC_Tactician::GetPlaceableObject1x4ForWaitingSeat5678()
+TArray<FPlaceableArenaRowArr> AAC_Tactician::GetPlaceableArena()
 {
-	if (PlaceableObject1x4ForWaitingSeat5678 == nullptr)
+	if (PlaceableArena.IsEmpty() == true)
 	{
-		const FString key = GetObjectKey() + TEXT("PlaceableObject1x4ForWaitingSeat5678");
-		FVector loc = UAC_FunctionLibrary::GetObjectManager(GetWorld())->GetEnvObject()->GetWaitingSeat()[Def_WaitingSeat5678]->GetActorLocation();
-		loc.X += 50.f;
-		loc.Y += 200.f;
-		loc.Z += 12.5f;
-		UAC_FunctionLibrary::GetObjectManager(GetWorld())->AddAndSpawnObject(key, loc, FRotator(), FActorSpawnParameters());
-		UAC_FunctionLibrary::GetObjectManager(GetWorld())->SetObjectOnOff(key, false);
-		PlaceableObject1x4ForWaitingSeat5678 = Cast<AAC_ObjectBase>(UAC_FunctionLibrary::GetObjectManager(GetWorld())->FindObject(key));
+		PlaceableArena.Init(FPlaceableArenaRowArr(), 4);
+		for (int i = 0; i < 4; i++)
+		{
+			for (int j = 0; j < 8; j++)
+			{
+				const FString key = GetObjectKey() + TEXT("PlaceableObject1x1Arena") + FString::Printf(TEXT("%d"), i + 1) + FString::Printf(TEXT("%d"), j + 1);
+				FVector loc = UAC_FunctionLibrary::GetObjectManager(GetWorld())->GetEnvObject()->GetArena()[Def_ArenaLeftUp]->GetActorLocation();
+				loc.X += -50.f - i * 100.f;
+				loc.Y += 50.f + j * 100.f;
+				loc.Z += 12.5f;
+				UAC_FunctionLibrary::GetObjectManager(GetWorld())->AddAndSpawnObject(key, loc, FRotator(), FActorSpawnParameters());
+				UAC_FunctionLibrary::GetObjectManager(GetWorld())->SetObjectOnOff(key, false);
+				PlaceableArena[i].RowPlaceableArenaArr[j] = Cast<AAC_PlaceableObject1x1>(UAC_FunctionLibrary::GetObjectManager(GetWorld())->FindObject(key));
+			}
+		}
 	}
-	return PlaceableObject1x4ForWaitingSeat5678;
+
+	return PlaceableArena;
 }
 
 void AAC_Tactician::ActivateInterestFire()
