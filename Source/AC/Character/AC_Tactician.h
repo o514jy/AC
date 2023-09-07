@@ -51,6 +51,20 @@ public:
 	}
 };
 
+USTRUCT(BlueprintType)
+struct FArenaChampionRowArr
+{
+	GENERATED_BODY()
+
+public:
+	TArray<FString> ArenaChampionRowArr;
+
+	FArenaChampionRowArr()
+	{
+		ArenaChampionRowArr.Init(FString(), 8);
+	}
+};
+
 UCLASS()
 class AC_API AAC_Tactician : public AAC_CharacterBase
 {
@@ -78,6 +92,9 @@ public:
 	void SetWaitingChampionArr(const FString& key, int index);
 	TArray<FString> GetWaitingChampionArr();
 
+	void SetArenaChampionArr(const FString& key, int i_index, int j_index);
+	TArray<FArenaChampionRowArr> GetArenaChampionArr();
+
 	TArray<TObjectPtr<AAC_PlaceableObject1x1>> GetPlaceableWaitingSeat();
 	TArray<FPlaceableArenaRowArr> GetPlaceableArena();
 
@@ -87,7 +104,7 @@ private:
 	FTacticianStat TacticianStat;
 
 	TArray<FString/*key*/> WaitingChampionArr;
-	TArray<FString/*Key*/> ArenaChampionArr;
+	TArray<FArenaChampionRowArr> ArenaChampionArr;
 
 	TArray<TObjectPtr<AAC_PlaceableObject1x1>> PlaceableWaitingSeat;
 	TArray<FPlaceableArenaRowArr> PlaceableArena;

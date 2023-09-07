@@ -80,6 +80,7 @@ bool AAC_PlayerController::bCheckMousePositionOnStore()
 	if (absoluteScreenX >= 550 && absoluteScreenX <= 1520 && absoluteScreenY >= 920 && absoluteScreenY <= 1080)
 	{
 		ResellToStore.ExecuteIfBound(Cast<AAC_Champion>(PickedActor)->GetObjectKey());
+		PickedActor = nullptr;
 	}
 
 	Cast<UAC_ChampionStoreUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::ChampionStoreUI))->SetSellingButtonAndPrice(false, 0);
@@ -106,6 +107,132 @@ void AAC_PlayerController::SetPlaceableArenaOnOff(bool flag)
 			UAC_FunctionLibrary::GetObjectManager(GetWorld())->SetObjectOnOff(key, flag);
 		}
 	}
+}
+
+bool AAC_PlayerController::CheckAndPlacePickedActor()
+{
+	if (PickedActor == nullptr)
+		return false;
+
+	FHitResult CursorHit;
+	GetHitResultUnderCursor(ECollisionChannel::ECC_GameTraceChannel3, false, CursorHit);
+
+	FVector pickedActorCurrLocation = CursorHit.Location;
+
+	TArray<TObjectPtr<AAC_PlaceableObject1x1>> waitSeatArr = Cast<AAC_Tactician>(GetCharacter())->GetPlaceableWaitingSeat();
+	TArray<FPlaceableArenaRowArr> arenaArr = Cast<AAC_Tactician>(GetCharacter())->GetPlaceableArena();
+
+	int overlappedCount = 0;
+	float minDistance = 100000;
+	FVector currLoc;
+	FString currLocKey = FString();
+
+	TPair<int/*i*/, int/*j*/> arenaIndex;
+	arenaIndex.Key = -1;
+	arenaIndex.Value = -1;
+	int waitIndex = -1;
+
+	TPair<int, int> arenaCurrIndex;
+	arenaCurrIndex.Key = -1;
+	arenaCurrIndex.Value = -1;
+	int waitCurrIndex = -1;
+
+	int whatIndex = -1; // wait : 1, arena : 2
+	int whatPickedIndex = -1; 
+
+	// 충돌이 일어난 발판과 캐릭터 사이에 거리재서 가장 가까운 곳 기록
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+			if (Cast<AAC_Tactician>(GetCharacter())->GetArenaChampionArr()[i].ArenaChampionRowArr[j].Equals(Cast<AAC_Champion>(PickedActor)->GetObjectKey()))
+			{
+				arenaIndex.Key = i;
+				arenaIndex.Value = j;
+				whatIndex = 2;
+			}
+
+			if (arenaArr[i].RowPlaceableArenaArr[j]->GetbIsOverlapped() == true)
+			{
+				overlappedCount++;
+				float checkDis = FVector::Dist(pickedActorCurrLocation, arenaArr[i].RowPlaceableArenaArr[j]->GetActorLocation());
+				
+				if (checkDis < minDistance)
+				{
+					minDistance = checkDis;
+					currLocKey = Cast<AAC_Tactician>(GetCharacter())->GetArenaChampionArr()[i].ArenaChampionRowArr[j];
+					whatPickedIndex = 2;
+					arenaCurrIndex.Key = i;
+					arenaCurrIndex.Value = j;
+					currLoc = arenaArr[i].RowPlaceableArenaArr[j]->GetActorLocation();
+				}
+			}
+		}
+	}
+
+	for (int i = 0; i < 8; i++)
+	{
+		if (Cast<AAC_Tactician>(GetCharacter())->GetWaitingChampionArr()[i].Equals(Cast<AAC_Champion>(PickedActor)->GetObjectKey()))
+		{
+			waitIndex = i;
+			whatIndex = 1;
+		}
+
+		if (waitSeatArr[i]->GetbIsOverlapped() == true)
+		{
+			overlappedCount++;
+			float checkDis = FVector::Dist(pickedActorCurrLocation, waitSeatArr[i]->GetActorLocation());
+		
+			if (checkDis < minDistance)
+			{
+				minDistance = checkDis;
+				currLocKey = Cast<AAC_Tactician>(GetCharacter())->GetWaitingChampionArr()[i];
+				whatPickedIndex = 1;
+				waitCurrIndex = i;
+				currLoc = waitSeatArr[i]->GetActorLocation();
+			}
+		}
+	}
+
+	if (overlappedCount == 0)
+		return false;
+
+	// 교체작업
+	FVector tempLoc = pickedActorPrevLocation;
+	// 내려놓을 자리에 이미 다른 챔피언이 있었으면 이전 자리와 교체
+	if (currLocKey != FString())
+	{
+		UAC_FunctionLibrary::GetObjectManager(GetWorld())->FindChampion(currLocKey)->SetActorLocation(pickedActorPrevLocation);
+	}
+
+	switch (whatIndex) // wait : 1, arena : 2
+	{
+	case 1:
+		Cast<AAC_Tactician>(GetCharacter())->SetWaitingChampionArr(currLocKey, waitIndex);
+		break;
+	case 2:
+		Cast<AAC_Tactician>(GetCharacter())->SetArenaChampionArr(currLocKey, arenaIndex.Key, arenaIndex.Value);
+		break;
+	default:
+		break;
+	}
+
+	currLoc.Z += 53.f;
+	Cast<AAC_Champion>(PickedActor)->SetActorLocation(currLoc);
+
+	switch (whatPickedIndex) // wait : 1, arena : 2
+	{
+	case 1:
+		Cast<AAC_Tactician>(GetCharacter())->SetWaitingChampionArr(Cast<AAC_Champion>(PickedActor)->GetObjectKey(), waitCurrIndex);
+		break;
+	case 2:
+		Cast<AAC_Tactician>(GetCharacter())->SetArenaChampionArr(Cast<AAC_Champion>(PickedActor)->GetObjectKey(), arenaCurrIndex.Key, arenaCurrIndex.Value);
+		break;
+	default:
+		break;
+	}
+
+	return true;
 }
 
 void AAC_PlayerController::SetupInputComponent()
@@ -221,6 +348,7 @@ void AAC_PlayerController::OnSetLeftMouseButtonTriggered()
 		if (GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, false, CursorHit) == false)
 			return;
 
+		pickedActorPrevLocation = CursorHit.GetActor()->GetActorLocation();
 		PickedActor = Cast<IAC_TargetInterface>(CursorHit.GetActor());
 		TickPickingObject();
 	}
@@ -247,6 +375,10 @@ void AAC_PlayerController::OnSetLeftMouseButtonReleased()
 		else
 		{
 			bCheckMousePositionOnStore();
+
+			if (PickedActor != nullptr && CheckAndPlacePickedActor() == false)
+				Cast<AAC_Champion>(PickedActor)->SetActorLocation(pickedActorPrevLocation);
+
 			bIsPicked = false;
 			PickedActor = nullptr;
 		}
@@ -254,6 +386,10 @@ void AAC_PlayerController::OnSetLeftMouseButtonReleased()
 	else
 	{
 		bCheckMousePositionOnStore();
+
+		if (PickedActor != nullptr && CheckAndPlacePickedActor() == false)
+			Cast<AAC_Champion>(PickedActor)->SetActorLocation(pickedActorPrevLocation);
+
 		PickedActor = nullptr;
 	}
 
@@ -334,6 +470,26 @@ void AAC_PlayerController::PickingObject()
 	APawn* PickedPawn = Cast<APawn>(PickedActor);
 	FVector LocationXYZ = CursorHit.Location;
 	LocationXYZ.Z = PickedPawn->GetActorLocation().Z;
+	
+
+	FVector ActorLocation = pickedChampion->GetActorLocation();
+	FVector Start = ActorLocation;
+	FVector End = ActorLocation;
+	End.Z -= 1000.0f; // 바닥을 체크할 레이캐스트의 길이를 지정합니다.
+
+	FHitResult HitResult;
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(pickedChampion); // 레이캐스트에서 현재 액터를 무시합니다.
+
+	// 레이캐스트를 수행하여 바닥과의 충돌을 검사합니다.
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, CollisionParams))
+	{
+		// 바닥과 충돌한 경우, 액터의 위치를 조정합니다.
+		FVector NewActorLocation = HitResult.ImpactPoint;
+		LocationXYZ.Z = NewActorLocation.Z + 53.f;
+	}
+
+
 	PickedPawn->SetActorLocation(LocationXYZ);
 }
 

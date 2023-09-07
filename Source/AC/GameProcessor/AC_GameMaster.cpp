@@ -168,6 +168,7 @@ void AAC_GameMaster::ResellChampionCardUsingKey(const FString& key)
 		if (wcarr[i] == key)
 		{
 			GetTactician()->SetWaitingChampionArr(FString(), i);
+			break;
 		}
 	}
 

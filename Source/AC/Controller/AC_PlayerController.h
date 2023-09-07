@@ -61,6 +61,10 @@ public:
 	void SetPlaceableWaitingSeatOnOff(bool flag);
 	void SetPlaceableArenaOnOff(bool flag);
 
+	bool CheckAndPlacePickedActor();
+
+	FVector pickedActorPrevLocation;
+
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */
 	//uint32 bMoveToMouseCursor : 1;

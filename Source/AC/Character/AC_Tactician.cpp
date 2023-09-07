@@ -25,7 +25,7 @@ AAC_Tactician::AAC_Tactician()
 	Key = "Tactician1";
 
 	WaitingChampionArr.Init(FString(), 8);
-	ArenaChampionArr.Init(FString(), 32);
+	ArenaChampionArr.Init(FArenaChampionRowArr(), 4);
 }
 
 void AAC_Tactician::BeginPlay()
@@ -148,6 +148,16 @@ void AAC_Tactician::SetWaitingChampionArr(const FString& key, int index)
 TArray<FString> AAC_Tactician::GetWaitingChampionArr()
 {
 	return WaitingChampionArr;
+}
+
+void AAC_Tactician::SetArenaChampionArr(const FString& key, int i_index, int j_index)
+{
+	ArenaChampionArr[i_index].ArenaChampionRowArr[j_index] = key;
+}
+
+TArray<FArenaChampionRowArr> AAC_Tactician::GetArenaChampionArr()
+{
+	return ArenaChampionArr;
 }
 
 TArray<TObjectPtr<AAC_PlaceableObject1x1>> AAC_Tactician::GetPlaceableWaitingSeat()
