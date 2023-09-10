@@ -5,15 +5,29 @@
 #include "Components/CapsuleComponent.h"
 #include "AC/Data/AC_ChampionInfo.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Perception/PawnSensingComponent.h"
 // Manager
 #include "AC/Managers/AC_DataManager.h"
 #include "AC/Library/AC_FunctionLibrary.h"
+#include "AC/Enum/AC_Enum.h"
 
 AAC_Champion::AAC_Champion()
 {
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Champion"));
 
 	GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+
+	// AI 설정
+	static ConstructorHelpers::FClassFinder<AController> AIController(TEXT("Blueprint'/Game/Blueprints/Controller/BP_AIController.BP_AIController_C'"));
+	if (AIController.Succeeded())
+	{
+		AIControllerClass = AIController.Class;
+	}
+
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+	PawnSensing = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensing"));
+	PawnSensing->SetPeripheralVisionAngle(90.f);
 
 	// Set an initial velocity to make the Character fall
 	//FVector initialVelocity = FVector(0.0f, 0.0f, -1000.0f);
@@ -26,6 +40,54 @@ AAC_Champion::AAC_Champion()
 void AAC_Champion::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (PawnSensing)
+		PawnSensing->OnSeePawn.AddDynamic(this, &AAC_Champion::OnPawnSeen);
+}
+
+void AAC_Champion::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	switch (State)
+	{
+	case EState::Idle:
+		TickIdle();
+	case EState::Move:
+		TickMove();
+	case EState::Attack:
+		TickAttack();
+	case EState::Skill:
+		TickSkill();
+	case EState::Dead:
+		TickDead();
+	}
+}
+
+void AAC_Champion::TickIdle()
+{
+	// 비전투상태이거나 적이 모두 죽었을 경우 대기
+}
+
+void AAC_Champion::TickMove()
+{
+	// 공격 사거리까지 타겟을 향해 움직이고 닿았으면 attack으로 전환, 마나가 풀일 경우 skill로 전환
+	
+}
+
+void AAC_Champion::TickAttack()
+{
+	// 공격속도에 따라 타겟이 사거리 내에 있을 경우 attack, 없을경우 move로 전환
+}
+
+void AAC_Champion::TickSkill()
+{
+	// skill 사용 이후 타겟이 사거리 내에 있을 경우 attack, 없을 경우 move로 전환
+}
+
+void AAC_Champion::TickDead()
+{
+	// actor 삭제? 전투페이즈가 끝나면..dead가 아니라 invisible로 해야되나
 }
 
 void AAC_Champion::HighlightActor()
@@ -43,6 +105,21 @@ void AAC_Champion::UnHighlightActor()
 
 	GetMesh()->SetRenderCustomDepth(false);
 	Weapon->SetRenderCustomDepth(false);
+}
+
+void AAC_Champion::OnPawnSeen(APawn* seenPawn)
+{
+
+}
+
+void AAC_Champion::SetState(EState newState)
+{
+
+}
+
+EState AAC_Champion::GetState()
+{
+	return State;
 }
 
 void AAC_Champion::InitChampionStat()

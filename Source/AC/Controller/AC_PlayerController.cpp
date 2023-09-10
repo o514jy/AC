@@ -32,7 +32,7 @@ AAC_PlayerController::AAC_PlayerController()
 	DefaultMouseCursor = EMouseCursor::Default;
 	CachedDestination = FVector::ZeroVector;
 	FollowTime = 0.f;
-	ShortPressThreshold = 0.2f;
+	ShortPressThreshold = 0.5f;
 
 	Spline = CreateDefaultSubobject<USplineComponent>("Spline");
 }

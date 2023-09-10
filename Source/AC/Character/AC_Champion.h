@@ -4,8 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Character/AC_CharacterBase.h"
+#include "../Enum/AC_Enum.h"
 #include "../Interface/AC_TargetInterface.h"
 #include "AC_Champion.generated.h"
+
+class UPawnSensingComponent;
 
 USTRUCT(BlueprintType)
 struct FChampionStat
@@ -56,9 +59,28 @@ public:
 
 	virtual void BeginPlay() override;
 
+	virtual void Tick(float DeltaTime) override;
+
+	virtual void TickIdle();
+	virtual void TickMove();
+	virtual void TickAttack();
+	virtual void TickSkill();
+	virtual void TickDead();
+
 	virtual void HighlightActor() override;
 	virtual void UnHighlightActor() override;
 
+public:
+	UPROPERTY(VisibleAnywhere)
+	UPawnSensingComponent* PawnSensing;
+
+	UFUNCTION()
+	void OnPawnSeen(APawn* seenPawn);
+
+	void SetState(EState newState);
+	EState GetState();
+
+public:
 	virtual void InitChampionStat();
 
 	FChampionStat GetChampionStat() { return ChampionStat; }
@@ -69,4 +91,11 @@ protected:
 
 	FChampionStat ChampionStat;
 
+	EState State = EState::Idle;
+
+	// Timer
+	FTimerHandle WaitTimer;
+
+	// Combat Target
+	TObjectPtr<AAC_Champion> CombatTarget;
 };
