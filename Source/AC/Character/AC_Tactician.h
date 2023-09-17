@@ -19,6 +19,9 @@ public:
 	int Level = 1;
 
 	UPROPERTY()
+	int MaxTeamNum = 1;
+
+	UPROPERTY()
 	int Xp = 0;
 
 	UPROPERTY()
@@ -108,4 +111,6 @@ private:
 
 	TArray<TObjectPtr<AAC_PlaceableObject1x1>> PlaceableWaitingSeat;
 	TArray<FPlaceableArenaRowArr> PlaceableArena;
+
+
 };

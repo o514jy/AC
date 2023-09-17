@@ -19,6 +19,15 @@ enum class EUIType : uint8
 {
 	ChampionCardUI UMETA(DisplayName = "ChampionCardUI"),
 	ChampionStoreUI UMETA(DisplayName = "ChampionStoreUI"),
+	GameRoundUI UMETA(DisplayName = "GameRoundUI"),
+};
+
+UENUM(BlueprintType)
+enum class EGameState : uint8
+{
+	Prepare UMETA(DisplayName = "Prepare"),
+	Ready UMETA(DisplayName = "Ready"),
+	Battle UMETA(DisplayName = "Battle"),
 };
 
 #define NormalMaxLevel 6
@@ -40,5 +49,8 @@ enum class EUIType : uint8
 #define Def_NS_Fire4 3
 #define Def_NS_Fire5 4
 
+#define TimeLimit_Prepare 7
+#define TimeLimit_Ready 3
+#define TimeLimit_Battle 15
 
 

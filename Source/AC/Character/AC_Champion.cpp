@@ -6,6 +6,7 @@
 #include "AC/Data/AC_ChampionInfo.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/PawnSensingComponent.h"
+#include "AIController.h"
 // Manager
 #include "AC/Managers/AC_DataManager.h"
 #include "AC/Library/AC_FunctionLibrary.h"
@@ -72,7 +73,7 @@ void AAC_Champion::TickIdle()
 void AAC_Champion::TickMove()
 {
 	// 공격 사거리까지 타겟을 향해 움직이고 닿았으면 attack으로 전환, 마나가 풀일 경우 skill로 전환
-	
+	MoveToCombatTarget(CombatTarget);
 }
 
 void AAC_Champion::TickAttack()
@@ -109,7 +110,7 @@ void AAC_Champion::UnHighlightActor()
 
 void AAC_Champion::OnPawnSeen(APawn* seenPawn)
 {
-
+	State = EState::Move;
 }
 
 void AAC_Champion::SetState(EState newState)
@@ -117,9 +118,14 @@ void AAC_Champion::SetState(EState newState)
 
 }
 
-EState AAC_Champion::GetState()
+void AAC_Champion::SetCombatTarget(AAC_Champion* inTarget)
 {
-	return State;
+	CombatTarget = inTarget;
+}
+
+TObjectPtr<AAC_Champion> AAC_Champion::GetCombatTarget()
+{
+	return TObjectPtr<AAC_Champion>();
 }
 
 void AAC_Champion::InitChampionStat()
@@ -142,4 +148,29 @@ void AAC_Champion::InitChampionStat()
 	ChampionStat.ChampionStarLevel = initData.ChampionStarLevel;
 	ChampionStat.Ethnic = initData.Ethnic;
 	ChampionStat.Occupation = initData.Occupation;
+}
+
+void AAC_Champion::MoveToCombatTarget(AAC_Champion* inTarget)
+{
+	auto aiController = Cast<AAIController>(GetController());
+	if (aiController && inTarget)
+	{
+		FAIMoveRequest moveRequest;
+		moveRequest.SetGoalActor(inTarget);
+		moveRequest.SetAcceptanceRadius(15.f);
+
+		FNavPathSharedPtr navPath;
+		aiController->MoveTo(moveRequest, &navPath);
+
+		// Debug
+		if (navPath.IsValid())
+		{
+			TArray<FNavPathPoint>& pathPoints = navPath->GetPathPoints();
+			for (const auto& Point : pathPoints)
+			{
+				const FVector& location = Point.Location;
+				DrawDebugSphere(GetWorld(), location, 12.f, 12, FColor::Green, false, 10.f);
+			}
+		}
+	}
 }

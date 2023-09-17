@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "../Enum/AC_Enum.h"
 #include "AC_GameMaster.generated.h"
 
 struct FChampionInfo;
@@ -50,6 +51,13 @@ public:
 	bool SellChampionCardUsingKey(FString key, int championCost);
 	bool FindAndPlaceEmptySeat(FString key, TMap<FString, FChampionKeyArr>& championPool);
 
+	UFUNCTION()
+	void SetGame();
+
+	void SetRemainTimeAndRoundState();
+
+	void SetGameRound(int gameRound);
+
 private:
 	UPROPERTY()
 	TArray<FChampionInfo> ChampionInfoArr;
@@ -65,4 +73,19 @@ private:
 
 	UPROPERTY()
 	TMap<FString/*key*/, FChampionKeyArr> ChampionPool3Cost; // 챔피언당 10
+
+private:
+	// Timer
+	FTimerHandle RoundTimer;
+
+public:
+	int GetGameRound() { return GameRound; }
+
+private:
+	// Round
+	int GameRound = 1;
+	bool bRoundStart = false;
+	EGameState RoundState = EGameState::Prepare;
+	int RemainTime = -1;
+
 };

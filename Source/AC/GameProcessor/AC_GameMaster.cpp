@@ -3,8 +3,6 @@
 
 #include "GameProcessor/AC_GameMaster.h"
 #include "AC/Library/AC_FunctionLibrary.h"
-#include "AC/Managers/AC_DataManager.h"
-#include "AC/Managers/AC_ObjectManager.h"
 #include "AC/Data/AC_ChampionInfo.h"
 #include "AC/Data/AC_StoreProbabilityInfo.h"
 #include "AC/Character/AC_Tactician.h"
@@ -14,8 +12,14 @@
 #include "AC/Character/AC_Champion.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/StaticMeshActor.h"
-#include "AC/Enum/AC_Enum.h"
 #include "AC/Controller/AC_PlayerController.h"
+// Managers
+#include "AC/Managers/AC_DataManager.h"
+#include "AC/Managers/AC_ObjectManager.h"
+#include "AC/Managers/AC_UIManager.h"
+#include "AC/Enum/AC_Enum.h"
+// UI
+#include "AC/UI/GameRound/AC_GameRoundUI.h"
 
 // Sets default values
 AAC_GameMaster::AAC_GameMaster()
@@ -33,6 +37,8 @@ void AAC_GameMaster::BeginPlay()
 
 	AAC_PlayerController* PC = Cast<AAC_PlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	PC->ResellToStore.BindUObject(this, &AAC_GameMaster::ResellChampionCardUsingKey);
+
+	GetWorld()->GetTimerManager().SetTimer(RoundTimer, this, &AAC_GameMaster::SetGame, 1.0f, true, 2.0f);
 }
 
 // Called every frame
@@ -250,5 +256,87 @@ bool AAC_GameMaster::FindAndPlaceEmptySeat(FString key, TMap<FString, FChampionK
 		}
 	}
 	return sold;
+}
+
+void AAC_GameMaster::SetGame()
+{
+	AAC_UIManager* uiManager = UAC_FunctionLibrary::GetUIManager(GetWorld());
+	UAC_GameRoundUI* gameRoundUI = Cast<UAC_GameRoundUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::GameRoundUI));
+	
+	if (bRoundStart == false)
+	{
+		uiManager->OpenUI(EUIType::GameRoundUI);
+		bRoundStart = true;
+		SetGameRound(0);
+		RoundState = EGameState::Battle;
+	}
+
+	SetRemainTimeAndRoundState();
+
+}
+
+void AAC_GameMaster::SetRemainTimeAndRoundState()
+{
+	UAC_GameRoundUI* gameRoundUI = Cast<UAC_GameRoundUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::GameRoundUI));
+	
+	// round 상태가 바뀌었을 경우 초기화해주는 부분
+	if (RemainTime == -1)
+	{
+		switch (RoundState)
+		{
+		case EGameState::Prepare:
+			RoundState = EGameState::Ready;
+			break;
+		case EGameState::Ready:
+			RoundState = EGameState::Battle;
+			break;
+		case EGameState::Battle:
+			RoundState = EGameState::Prepare;
+			break;
+		default:
+			break;
+		}
+
+		gameRoundUI->SetGameStateText(RoundState); // 바뀐 State 반영
+
+		switch (RoundState)
+		{
+		case EGameState::Prepare:
+			RemainTime = TimeLimit_Prepare;
+			SetGameRound(GetGameRound() + 1);
+			break;
+		case EGameState::Ready:
+			RemainTime = TimeLimit_Ready;
+			break;
+		case EGameState::Battle:
+			RemainTime = TimeLimit_Battle;
+			break;
+		default:
+			break;
+		}
+	}
+	else // round 상태가 진행중인 경우 1초씩 시간 차감해서 반영
+	{
+		RemainTime--;
+
+		// 시간이 다 되었을 경우 다음 상태로 전환
+		if (RemainTime == 1)
+		{
+			gameRoundUI->SetRemainTimeText(RemainTime); // 1초일때 ui
+			RemainTime = -1; // 처음 초기화는 -1로
+			return;
+		}
+	}
+
+	gameRoundUI->SetRemainTimeText(RemainTime);
+
+}
+
+void AAC_GameMaster::SetGameRound(int gameRound)
+{
+	UAC_GameRoundUI* gameRoundUI = Cast<UAC_GameRoundUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::GameRoundUI));
+	gameRoundUI->SetPresentRoundText(gameRound);
+	GameRound = gameRound;
+
 }
 

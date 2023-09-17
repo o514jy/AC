@@ -78,12 +78,18 @@ public:
 	void OnPawnSeen(APawn* seenPawn);
 
 	void SetState(EState newState);
-	EState GetState();
+	EState GetState() { return State; }
+
+	void SetCombatTarget(AAC_Champion* inTarget);
+	TObjectPtr<AAC_Champion> GetCombatTarget();
 
 public:
 	virtual void InitChampionStat();
 
 	FChampionStat GetChampionStat() { return ChampionStat; }
+
+	// process state
+	void MoveToCombatTarget(AAC_Champion* inTarget);
 
 protected:
 	UPROPERTY(BlueprintReadOnly)

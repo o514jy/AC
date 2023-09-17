@@ -17,6 +17,15 @@ AAC_UIManager::AAC_UIManager()
 			ChampionStoreUIClass = StoreUI.Class;
 		}
 	}
+
+	if (GameRoundUIClass == nullptr)
+	{
+		static ConstructorHelpers::FClassFinder<UAC_GameRoundUI> RoundUI(TEXT("WidgetBlueprint'/Game/Blueprints/UI/GameRound/WBP_GameRound.WBP_GameRound_C'"));
+		if (RoundUI.Succeeded())
+		{
+			GameRoundUIClass = RoundUI.Class;
+		}
+	}
 }
 
 // Called when the game starts or when spawned
@@ -26,6 +35,7 @@ void AAC_UIManager::BeginPlay()
 	
 	//ChampionStoreUI = GetWorld()->SpawnActor<UAC_ChampionStoreUI>(ChampionStoreUIClass);
 	ChampionStoreUI = CreateWidget<UAC_UserWidget>(GetWorld(), ChampionStoreUIClass);
+	GameRoundUI = CreateWidget<UAC_UserWidget>(GetWorld(), GameRoundUIClass);
 }
 
 // Called every frame
@@ -44,6 +54,8 @@ void AAC_UIManager::OpenUI(EUIType type)
 	case EUIType::ChampionStoreUI:
 		ChampionStoreUI->AddToViewport();
 		break;
+	case EUIType::GameRoundUI:
+		GameRoundUI->AddToViewport();
 	default:
 		break;
 	}
@@ -58,6 +70,8 @@ UAC_UserWidget* AAC_UIManager::GetUI(EUIType type)
 	case EUIType::ChampionStoreUI:
 		return ChampionStoreUI;
 		break;
+	case EUIType::GameRoundUI:
+		return GameRoundUI;
 	default:
 		break;
 	}
