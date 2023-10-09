@@ -3,6 +3,8 @@
 
 #include "Character/AC_CharacterBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "AC/GameProcessor/AC_GameMaster.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AAC_CharacterBase::AAC_CharacterBase()
@@ -42,5 +44,18 @@ void AAC_CharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+TObjectPtr<AAC_GameMaster> AAC_CharacterBase::GetGameMaster()
+{
+	TArray<AActor*> arrOutActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AAC_GameMaster::StaticClass(), arrOutActors);
+
+	for (int i = 0; i < arrOutActors.Num(); ++i)
+	{
+		GameMaster = dynamic_cast<AAC_GameMaster*>(arrOutActors[i]);
+	}
+
+	return GameMaster;
 }
 

@@ -243,8 +243,8 @@ bool AAC_GameMaster::FindAndPlaceEmptySeat(FString key, TMap<FString, FChampionK
 		{
 			sold = true;
 			GetTactician()->SetWaitingChampionArr(inGameKey, i);
-			const FString key = GetTactician()->GetObjectKey() + TEXT("PlaceableObject1x1WaitingSeat") + FString::Printf(TEXT("%d"), i + 1);
-			FVector loc = UAC_FunctionLibrary::GetObjectManager(GetWorld())->FindObject(key)->GetActorLocation();
+			const FString seatKey = GetTactician()->GetObjectKey() + TEXT("PlaceableObject1x1WaitingSeat") + FString::Printf(TEXT("%d"), i + 1);
+			FVector loc = UAC_FunctionLibrary::GetObjectManager(GetWorld())->FindObject(seatKey)->GetActorLocation();
 			
 			UAC_FunctionLibrary::GetObjectManager(GetWorld())->AddAndSpawnCharacter(
 				inGameKey,
@@ -297,23 +297,9 @@ void AAC_GameMaster::SetRemainTimeAndRoundState()
 			break;
 		}
 
-		gameRoundUI->SetGameStateText(RoundState); // 바뀐 State 반영
+		// 바뀐 state를 업데이트
+		UpdateRoundState();
 
-		switch (RoundState)
-		{
-		case EGameState::Prepare:
-			RemainTime = TimeLimit_Prepare;
-			SetGameRound(GetGameRound() + 1);
-			break;
-		case EGameState::Ready:
-			RemainTime = TimeLimit_Ready;
-			break;
-		case EGameState::Battle:
-			RemainTime = TimeLimit_Battle;
-			break;
-		default:
-			break;
-		}
 	}
 	else // round 상태가 진행중인 경우 1초씩 시간 차감해서 반영
 	{
@@ -332,6 +318,76 @@ void AAC_GameMaster::SetRemainTimeAndRoundState()
 
 }
 
+void AAC_GameMaster::UpdateRoundState()
+{
+	UAC_GameRoundUI* gameRoundUI = Cast<UAC_GameRoundUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::GameRoundUI));
+
+	gameRoundUI->SetGameStateText(RoundState); // 바뀐 State 반영
+
+	switch (RoundState)
+	{
+	case EGameState::Prepare:
+		SetPrepareState();
+		break;
+	case EGameState::Ready:
+		SetReadyState();
+		break;
+	case EGameState::Battle:
+		SetBattleState();
+		break;
+	default:
+		break;
+	}
+}
+
+void AAC_GameMaster::SetPrepareState()
+{
+	UAC_GameRoundUI* gameRoundUI = Cast<UAC_GameRoundUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::GameRoundUI));
+	UAC_ChampionStoreUI* championStoreUI = Cast<UAC_ChampionStoreUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::ChampionStoreUI));
+
+	AAC_ObjectManager* objManager = UAC_FunctionLibrary::GetObjectManager(GetWorld());
+
+	RemainTime = TimeLimit_Prepare;
+
+	// 라운드 갱신
+	SetGameRound(GetGameRound() + 1);
+
+	// 크립 라운드용 팀 초기화
+	for (auto& index : CreepTeamKeyArr)
+	{
+		AAC_Champion* creepChamp = objManager->FindChampion(index);
+		if (creepChamp != nullptr)
+			creepChamp->Destroy();
+	}
+	CreepTeamKeyArr.Empty();
+
+	// 상점 새로고침, 잠겨있으면 새로고침 안함
+	if (championStoreUI->GetbIsLocked() == true)
+		championStoreUI->SetbIsLocked(false);
+	else
+		championStoreUI->SetStoreReRoll();
+
+	// 전투가 끝났을 경우 팀 다시 위치로 복원
+
+
+}
+
+void AAC_GameMaster::SetReadyState()
+{
+	UAC_GameRoundUI* gameRoundUI = Cast<UAC_GameRoundUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::GameRoundUI));
+
+	SpawnCreepTeam(GameRound);
+
+	RemainTime = TimeLimit_Ready;
+}
+
+void AAC_GameMaster::SetBattleState()
+{
+	UAC_GameRoundUI* gameRoundUI = Cast<UAC_GameRoundUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::GameRoundUI));
+	
+	RemainTime = TimeLimit_Battle;
+}
+
 void AAC_GameMaster::SetGameRound(int gameRound)
 {
 	UAC_GameRoundUI* gameRoundUI = Cast<UAC_GameRoundUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::GameRoundUI));
@@ -339,4 +395,127 @@ void AAC_GameMaster::SetGameRound(int gameRound)
 	GameRound = gameRound;
 
 }
+
+void AAC_GameMaster::SpawnCreepTeam(int teamNum)
+{
+	auto* objManager = UAC_FunctionLibrary::GetObjectManager(GetWorld());
+
+	// temp 하드코딩
+
+	FString key1;
+	FVector loc1 = objManager->GetEnvObject()->GetArena()[Def_ArenaLeftUp]->GetActorLocation();
+	loc1.Z += 60;
+	FString key2;
+	FVector loc2 = objManager->GetEnvObject()->GetArena()[Def_ArenaLeftUp]->GetActorLocation();
+	loc2.Z += 60;
+	FString key3;
+	FVector loc3 = objManager->GetEnvObject()->GetArena()[Def_ArenaLeftUp]->GetActorLocation();
+	loc3.Z += 60;
+	FString key4;
+	FVector loc4 = objManager->GetEnvObject()->GetArena()[Def_ArenaLeftUp]->GetActorLocation();
+	loc4.Z += 60;
+	switch (teamNum)
+	{
+	case 1:
+		key1 = "GoblinSpearCreep1";
+		loc1.X += 150.f;
+		loc1.Y += 350.f;
+		objManager->AddAndSpawnCharacter(
+			key1,
+			loc1,
+			FRotator(0, 180, 0),
+			FActorSpawnParameters()
+		);
+		CreepTeamKeyArr.Add(key1);
+		key2 = "GoblinSpearCreep2";
+		loc2.X += 150.f;
+		loc2.Y += 450.f;
+		objManager->AddAndSpawnCharacter(
+			key2,
+			loc2,
+			FRotator(0, 180, 0),
+			FActorSpawnParameters()
+		);
+		CreepTeamKeyArr.Add(key2);
+		break;
+	case 2:
+		key1 = "GoblinSpearCreep1";
+		loc1.X += 150.f;
+		loc1.Y += 350.f;
+		objManager->AddAndSpawnCharacter(
+			key1,
+			loc1,
+			FRotator(0, 180, 0),
+			FActorSpawnParameters()
+		);
+		CreepTeamKeyArr.Add(key1);
+		key2 = "GoblinSpearCreep2";
+		loc2.X += 150.f;
+		loc2.Y += 450.f;
+		objManager->AddAndSpawnCharacter(
+			key2,
+			loc2,
+			FRotator(0, 180, 0),
+			FActorSpawnParameters()
+		);
+		CreepTeamKeyArr.Add(key2);
+		key3 = "GoblinSlingshotCreep1";
+		loc3.X += 250.f;
+		loc3.Y += 350.f;
+		objManager->AddAndSpawnCharacter(
+			key3,
+			loc3,
+			FRotator(0, 180, 0),
+			FActorSpawnParameters()
+		);
+		CreepTeamKeyArr.Add(key3);
+		break;
+	case 3:
+		key1 = "GoblinSpearCreep1";
+		loc1.X += 150.f;
+		loc1.Y += 350.f;
+		objManager->AddAndSpawnCharacter(
+			key1,
+			loc1,
+			FRotator(0, 180, 0),
+			FActorSpawnParameters()
+		);
+		CreepTeamKeyArr.Add(key1);
+		key2 = "GoblinSpearCreep2";
+		loc2.X += 150.f;
+		loc2.Y += 450.f;
+		objManager->AddAndSpawnCharacter(
+			key2,
+			loc2,
+			FRotator(0, 180, 0),
+			FActorSpawnParameters()
+		);
+		CreepTeamKeyArr.Add(key2);
+		key3 = "GoblinSlingshotCreep1";
+		loc3.X += 250.f;
+		loc3.Y += 350.f;
+		objManager->AddAndSpawnCharacter(
+			key3,
+			loc3,
+			FRotator(0, 180, 0),
+			FActorSpawnParameters()
+		);
+		CreepTeamKeyArr.Add(key3);
+		key4 = "GoblinSlingshotCreep2";
+		loc4.X += 250.f;
+		loc4.Y += 450.f;
+		objManager->AddAndSpawnCharacter(
+			key4,
+			loc4,
+			FRotator(0, 180, 0),
+			FActorSpawnParameters()
+		);
+		CreepTeamKeyArr.Add(key4);
+		break;
+	default:
+		break;
+	}
+}
+
+
 

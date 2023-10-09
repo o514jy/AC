@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "AC_CharacterBase.generated.h"
 
+class AAC_GameMaster;
+
 UCLASS()
 class AC_API AAC_CharacterBase : public ACharacter
 {
@@ -38,4 +40,13 @@ protected:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	FString Key;
+
+
+	//temp
+public:
+	TObjectPtr<AAC_GameMaster> GetGameMaster();
+
+private:
+	UPROPERTY()
+	TObjectPtr<AAC_GameMaster> GameMaster;
 };

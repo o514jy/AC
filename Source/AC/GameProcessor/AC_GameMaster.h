@@ -9,6 +9,7 @@
 
 struct FChampionInfo;
 class AAC_Tactician;
+class AAC_Champion;
 class IAC_TargetInterface;
 
 USTRUCT(BlueprintType)
@@ -50,13 +51,31 @@ public:
 	
 	bool SellChampionCardUsingKey(FString key, int championCost);
 	bool FindAndPlaceEmptySeat(FString key, TMap<FString, FChampionKeyArr>& championPool);
+	
+public:
+	// Round 설정
 
 	UFUNCTION()
 	void SetGame();
 
 	void SetRemainTimeAndRoundState();
 
+	void UpdateRoundState();
+	
+	void SetPrepareState();
+	void SetReadyState();
+	void SetBattleState();
+
 	void SetGameRound(int gameRound);
+
+	EGameState GetRoundState() { return RoundState; }
+
+public:
+	// 크립 라운드용 팀 설정 (1:창고블린2) (2:창고블린2,새총고블린1) (3:창고블린2,새총고블린2)
+	void SpawnCreepTeam(int teamNum);
+
+	TArray<FString> CreepTeamKeyArr;
+
 
 private:
 	UPROPERTY()

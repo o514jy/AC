@@ -73,6 +73,18 @@ void UAC_ChampionStoreUI::SetChampionCards()
 	ChampionCard5->SetChampionCardUI(GetGameMaster()->PickChampionCardRandomlyUsingKey());
 }
 
+void UAC_ChampionStoreUI::SetStoreReRoll()
+{
+	SetbIsLocked(false);
+	SetChampionCards();
+	// 구매 가능상태로 초기화
+	ChampionCard1->SetbSold(false);
+	ChampionCard2->SetbSold(false);
+	ChampionCard3->SetbSold(false);
+	ChampionCard4->SetbSold(false);
+	ChampionCard5->SetbSold(false);
+}
+
 void UAC_ChampionStoreUI::OnClickedIsLockedButton()
 {
 	if (bIsLocked == true)
@@ -100,13 +112,7 @@ void UAC_ChampionStoreUI::OnClickedReRollButton()
 	
 	if (GetGameMaster()->GetTactician()->SubPossessionGold(2))
 	{
-		SetbIsLocked(false);
-		SetChampionCards();
-		ChampionCard1->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-		ChampionCard2->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-		ChampionCard3->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-		ChampionCard4->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-		ChampionCard5->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		SetStoreReRoll();
 	}
 }
 
@@ -185,11 +191,16 @@ void UAC_ChampionStoreUI::SetSellingButtonAndPrice(bool visible, int price)
 		SellingButton->SetVisibility(ESlateVisibility::Hidden);
 		bSellingButtonVisible = false;
 
-		ChampionCard1->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-		ChampionCard2->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-		ChampionCard3->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-		ChampionCard4->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-		ChampionCard5->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		if (ChampionCard1->GetbSold() == false)
+			ChampionCard1->SetVisibility(ESlateVisibility::Visible);
+		if (ChampionCard2->GetbSold() == false)
+			ChampionCard2->SetVisibility(ESlateVisibility::Visible);
+		if (ChampionCard3->GetbSold() == false)
+			ChampionCard3->SetVisibility(ESlateVisibility::Visible);
+		if (ChampionCard4->GetbSold() == false)
+			ChampionCard4->SetVisibility(ESlateVisibility::Visible);
+		if (ChampionCard5->GetbSold() == false)
+			ChampionCard5->SetVisibility(ESlateVisibility::Visible);
 	}
 }
 

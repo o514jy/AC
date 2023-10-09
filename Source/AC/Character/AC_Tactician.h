@@ -8,6 +8,7 @@
 
 class AAC_PlaceableObject1x1;
 class AAC_ObjectBase;
+class AAC_Champion;
 
 USTRUCT(BlueprintType)
 struct FTacticianStat
@@ -101,6 +102,7 @@ public:
 	TArray<TObjectPtr<AAC_PlaceableObject1x1>> GetPlaceableWaitingSeat();
 	TArray<FPlaceableArenaRowArr> GetPlaceableArena();
 
+	// 이자 불 이펙트 활성화
 	void ActivateInterestFire();
 
 private:
@@ -112,5 +114,5 @@ private:
 	TArray<TObjectPtr<AAC_PlaceableObject1x1>> PlaceableWaitingSeat;
 	TArray<FPlaceableArenaRowArr> PlaceableArena;
 
-
+	TArray<TSharedPtr<AAC_Champion>> MyTeamArr;
 };

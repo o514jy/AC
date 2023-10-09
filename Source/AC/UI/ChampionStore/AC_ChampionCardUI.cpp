@@ -36,12 +36,26 @@ void UAC_ChampionCardUI::SetChampionCardUI(FString key)
 	ChampionCostText->SetText(FText::FromString(FString::FromInt(info.ChampionCost)));
 }
 
+void UAC_ChampionCardUI::SetbSold(bool sold)
+{
+	if (sold == true)
+	{
+		SetVisibility(ESlateVisibility::Hidden);
+		bSold = true;
+	}
+	else
+	{
+		SetVisibility(ESlateVisibility::Visible);
+		bSold = false;
+	}
+}
+
 void UAC_ChampionCardUI::OnClickedBuyChampionButton()
 {
 	int ChampionCost = UKismetStringLibrary::Conv_StringToInt(ChampionCostText->GetText().ToString());
 	if (GetGameMaster()->SellChampionCardUsingKey(Key, ChampionCost) == true && GetGameMaster()->GetTactician()->SubPossessionGold(ChampionCost) == true)
 	{
-		SetVisibility(ESlateVisibility::Hidden);
+		SetbSold(true);
 	}
 }
 

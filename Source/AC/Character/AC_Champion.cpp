@@ -7,9 +7,14 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/PawnSensingComponent.h"
 #include "AIController.h"
+#include "AC/Character/AC_Tactician.h"
 // Manager
 #include "AC/Managers/AC_DataManager.h"
+#include "AC/Managers/AC_ObjectManager.h"
 #include "AC/Library/AC_FunctionLibrary.h"
+#include "AC/Enum/AC_Enum.h"
+
+#include "AC/GameProcessor/AC_GameMaster.h"
 #include "AC/Enum/AC_Enum.h"
 
 AAC_Champion::AAC_Champion()
@@ -18,17 +23,20 @@ AAC_Champion::AAC_Champion()
 
 	GetCharacterMovement()->SetMovementMode(MOVE_Falling);
 
+	GetCharacterMovement()->MaxWalkSpeed = 200.f;
+
 	// AI 설정
-	static ConstructorHelpers::FClassFinder<AController> AIController(TEXT("Blueprint'/Game/Blueprints/Controller/BP_AIController.BP_AIController_C'"));
-	if (AIController.Succeeded())
-	{
-		AIControllerClass = AIController.Class;
-	}
+	//static ConstructorHelpers::FClassFinder<AController> AIController(TEXT("Blueprint'/Game/Blueprints/Controller/BP_AIController.BP_AIController_C'"));
+	//if (AIController.Succeeded())
+	//{
+	//	AIControllerClass = AIController.Class;
+	//}
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	PawnSensing = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensing"));
-	PawnSensing->SetPeripheralVisionAngle(90.f);
+	PawnSensing->SetPeripheralVisionAngle(80.f);
+	PawnSensing->bOnlySensePlayers = false;
 
 	// Set an initial velocity to make the Character fall
 	//FVector initialVelocity = FVector(0.0f, 0.0f, -1000.0f);
@@ -42,6 +50,10 @@ void AAC_Champion::BeginPlay()
 {
 	Super::BeginPlay();
 
+	InitChampionStat();
+
+	this->SpawnDefaultController();
+
 	if (PawnSensing)
 		PawnSensing->OnSeePawn.AddDynamic(this, &AAC_Champion::OnPawnSeen);
 }
@@ -54,26 +66,36 @@ void AAC_Champion::Tick(float DeltaTime)
 	{
 	case EState::Idle:
 		TickIdle();
+		break;
 	case EState::Move:
 		TickMove();
+		break;
 	case EState::Attack:
 		TickAttack();
+		break;
 	case EState::Skill:
 		TickSkill();
+		break;
 	case EState::Dead:
 		TickDead();
+		break;
 	}
 }
 
 void AAC_Champion::TickIdle()
 {
-	// 비전투상태이거나 적이 모두 죽었을 경우 대기
+	// Battle 상태일 경우 움직이기 시작
+	if (GetGameMaster()->GetRoundState() == EGameState::Battle)
+	{
+		SetState(EState::Move);
+	}
 }
 
 void AAC_Champion::TickMove()
 {
 	// 공격 사거리까지 타겟을 향해 움직이고 닿았으면 attack으로 전환, 마나가 풀일 경우 skill로 전환
 	MoveToCombatTarget(CombatTarget);
+
 }
 
 void AAC_Champion::TickAttack()
@@ -110,12 +132,56 @@ void AAC_Champion::UnHighlightActor()
 
 void AAC_Champion::OnPawnSeen(APawn* seenPawn)
 {
+	if (seenPawn == nullptr)
+		return;
+
+	// champion에만 반응
+	CombatTarget = Cast<AAC_Champion>(seenPawn);
+
+	if (CombatTarget == nullptr)
+		return;
+
+	// 서로 아군일 경우 패스
+	if (this->GetbIsEnemy() == true)
+	{
+		if (CombatTarget->GetbIsEnemy() == true)
+		{
+			CombatTarget = nullptr;
+			return;
+		}
+	}
+	else
+	{
+		if (CombatTarget->GetbIsEnemy() == false)
+		{
+			CombatTarget = nullptr;
+			return;
+		}
+	}
+
 	State = EState::Move;
 }
 
 void AAC_Champion::SetState(EState newState)
 {
-
+	switch (newState)
+	{
+	case EState::Idle:
+		State = EState::Idle;
+		break;
+	case EState::Move:
+		State = EState::Move;
+		break;
+	case EState::Attack:
+		State = EState::Attack;
+		break;
+	case EState::Skill:
+		State = EState::Skill;
+		break;
+	case EState::Dead:
+		State = EState::Dead;
+		break;
+	}
 }
 
 void AAC_Champion::SetCombatTarget(AAC_Champion* inTarget)
@@ -125,7 +191,17 @@ void AAC_Champion::SetCombatTarget(AAC_Champion* inTarget)
 
 TObjectPtr<AAC_Champion> AAC_Champion::GetCombatTarget()
 {
-	return TObjectPtr<AAC_Champion>();
+	return CombatTarget;
+}
+
+void AAC_Champion::SetOwnerTactician(TObjectPtr<AAC_Tactician> ownerTactician)
+{
+	OwnerTactician = ownerTactician;
+}
+
+TObjectPtr<AAC_Tactician> AAC_Champion::GetOwnerTactician()
+{
+	return OwnerTactician;
 }
 
 void AAC_Champion::InitChampionStat()
@@ -157,7 +233,7 @@ void AAC_Champion::MoveToCombatTarget(AAC_Champion* inTarget)
 	{
 		FAIMoveRequest moveRequest;
 		moveRequest.SetGoalActor(inTarget);
-		moveRequest.SetAcceptanceRadius(15.f);
+		moveRequest.SetAcceptanceRadius(30.f);
 
 		FNavPathSharedPtr navPath;
 		aiController->MoveTo(moveRequest, &navPath);

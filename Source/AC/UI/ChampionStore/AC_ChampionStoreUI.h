@@ -31,6 +31,9 @@ public:
 	UFUNCTION()
 	void SetChampionCards();
 
+	UFUNCTION()
+	void SetStoreReRoll();
+
 	// set
 	UFUNCTION()
 	void SetLockedText();

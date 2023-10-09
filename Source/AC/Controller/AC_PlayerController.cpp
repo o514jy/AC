@@ -406,10 +406,19 @@ void AAC_PlayerController::TickCursorTrace()
 {
 	FHitResult CursorHit;
 
-	if (GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, false, CursorHit) == false)
-		return;
+	IAC_TargetInterface* LocalTargetActor;
 
-	IAC_TargetInterface* LocalTargetActor = Cast<IAC_TargetInterface>(CursorHit.GetActor());
+	if (PickedActor == nullptr)
+	{
+		if (GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, false, CursorHit) == false)
+			return;
+
+		LocalTargetActor = Cast<IAC_TargetInterface>(CursorHit.GetActor());
+	}
+	else
+	{
+		LocalTargetActor = PickedActor;
+	}
 
 	if (LocalTargetActor == nullptr)
 	{
@@ -421,6 +430,10 @@ void AAC_PlayerController::TickCursorTrace()
 	}
 	else
 	{
+		// 적팀일 경우 표시X
+		if (Cast<AAC_Champion>(LocalTargetActor)->GetbIsEnemy() == true)
+			return;
+
 		if (TargetActor)
 		{
 			// 원래 있었는데 다른 애였음
@@ -455,6 +468,12 @@ void AAC_PlayerController::PickingObject()
 	UAC_ChampionStoreUI* championStoreUI = Cast<UAC_ChampionStoreUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::ChampionStoreUI));
 	AAC_Champion* pickedChampion = Cast<AAC_Champion>(PickedActor);
 
+	if (pickedChampion->GetbIsEnemy() == true)
+	{
+		PickedActor = nullptr;
+		return;
+	}
+
 	if (championStoreUI->GetSellingButtonVisible() == false)
 	{
 		championStoreUI->SetSellingButtonAndPrice(true, pickedChampion->GetChampionStat().ChampionCost);
@@ -482,7 +501,7 @@ void AAC_PlayerController::PickingObject()
 	CollisionParams.AddIgnoredActor(pickedChampion); // 레이캐스트에서 현재 액터를 무시합니다.
 
 	// 레이캐스트를 수행하여 바닥과의 충돌을 검사합니다.
-	if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, CollisionParams))
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_GameTraceChannel3, CollisionParams))
 	{
 		// 바닥과 충돌한 경우, 액터의 위치를 조정합니다.
 		FVector NewActorLocation = HitResult.ImpactPoint;

@@ -5,6 +5,7 @@
 #include "AC/Object/AC_EnvObject.h"
 #include "AC/Object/AC_PlaceableObject1x1.h"
 #include "AC/Character/AC_CharacterBase.h"
+#include "AC/Character/AC_Tactician.h"
 #include "AC/Character/AC_DemonDark.h"
 #include "AC/Character/AC_DemonRed.h"
 #include "AC/Character/AC_GhoulAbyss.h"
@@ -16,6 +17,7 @@
 #include "AC/Enum/AC_Enum.h"
 //temp
 #include "Engine/StaticMeshActor.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AAC_ObjectManager::AAC_ObjectManager()
@@ -110,6 +112,8 @@ void AAC_ObjectManager::BeginPlay()
 
 	EnvObject = (AAC_EnvObject*)GetWorld()->SpawnActor<AAC_EnvObject>(AAC_EnvObject::StaticClass(), FVector(0, 0, 0), FRotator(0, 0, 0), SpawnParams);
 
+	auto tactician = Cast<AAC_Tactician>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	TacticianMap.Add(tactician->GetObjectKey(), tactician);
 }
 
 // Called every frame
@@ -173,6 +177,7 @@ void AAC_ObjectManager::AddAndSpawnObject(const FString& key, FVector location, 
 void AAC_ObjectManager::AddAndSpawnCharacter(const FString& key, FVector location, FRotator rotation, FActorSpawnParameters spawnParams)
 {
 	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+	//spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	
 	AAC_Champion* actor = nullptr;
 
@@ -197,8 +202,12 @@ void AAC_ObjectManager::AddAndSpawnCharacter(const FString& key, FVector locatio
 	if (key.Contains(TEXT("ShroomPoison")))
 		actor = (AAC_Champion*)GetWorld()->SpawnActor<AAC_ShroomPoison>(ShroomPoisonClass, location, rotation, spawnParams);
 
+	if (key.Contains(TEXT("Creep")))
+		actor->SetbIsEnemy(true);
+
 	if (actor != nullptr)
 	{
+		//actor->SpawnDefaultController();
 		actor->SetObjectKey(key);
 		actor->InitChampionStat();
 		ChampionMap.Add(key, actor);

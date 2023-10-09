@@ -25,6 +25,10 @@ public:
 	
 	void SetChampionCardUI(FString key);
 
+	void SetbSold(bool sold);
+
+	bool GetbSold() { return bSold; }
+
 private:
 	// button event
 	UFUNCTION()
@@ -62,4 +66,5 @@ private:
 	TObjectPtr<UTextBlock> ChampionCostText;
 
 	FString Key;
+	bool bSold = false;
 };

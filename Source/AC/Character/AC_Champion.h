@@ -9,6 +9,7 @@
 #include "AC_Champion.generated.h"
 
 class UPawnSensingComponent;
+class AAC_Tactician;
 
 USTRUCT(BlueprintType)
 struct FChampionStat
@@ -77,11 +78,19 @@ public:
 	UFUNCTION()
 	void OnPawnSeen(APawn* seenPawn);
 
+
+
 	void SetState(EState newState);
 	EState GetState() { return State; }
 
 	void SetCombatTarget(AAC_Champion* inTarget);
 	TObjectPtr<AAC_Champion> GetCombatTarget();
+
+	void SetOwnerTactician(TObjectPtr<AAC_Tactician> ownerTactician);
+	TObjectPtr<AAC_Tactician> GetOwnerTactician();
+
+	void SetbIsEnemy(bool isEnemy) { bIsEnemy = isEnemy; }
+	bool GetbIsEnemy() { return bIsEnemy; }
 
 public:
 	virtual void InitChampionStat();
@@ -103,5 +112,14 @@ protected:
 	FTimerHandle WaitTimer;
 
 	// Combat Target
-	TObjectPtr<AAC_Champion> CombatTarget;
+	TObjectPtr<AAC_Champion> CombatTarget = nullptr;
+
+	// Owner
+	TObjectPtr<AAC_Tactician> OwnerTactician = nullptr;
+
+	// creep인지 확인
+	bool bIsEnemy = false;
+
+
+
 };
