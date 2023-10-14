@@ -35,6 +35,9 @@ public:
 	int Health = 100;
 
 	UPROPERTY()
+	int MaxHealth = 100;
+
+	UPROPERTY()
 	float MoveSpeedRatio = 1;
 
 	UPROPERTY()
@@ -102,6 +105,10 @@ public:
 	TArray<TObjectPtr<AAC_PlaceableObject1x1>> GetPlaceableWaitingSeat();
 	TArray<FPlaceableArenaRowArr> GetPlaceableArena();
 
+	void AddMyTeamArr(AAC_Champion* champion);
+	void SubMyTeamArr(AAC_Champion* champion);
+	TArray<TObjectPtr<AAC_Champion>> GetMyTeamArr() { return MyTeamArr; }
+
 	// 이자 불 이펙트 활성화
 	void ActivateInterestFire();
 
@@ -114,5 +121,5 @@ private:
 	TArray<TObjectPtr<AAC_PlaceableObject1x1>> PlaceableWaitingSeat;
 	TArray<FPlaceableArenaRowArr> PlaceableArena;
 
-	TArray<TSharedPtr<AAC_Champion>> MyTeamArr;
+	TArray<TObjectPtr<AAC_Champion>> MyTeamArr;
 };

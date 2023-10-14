@@ -16,6 +16,7 @@
 #include "AC/Character/AC_Champion.h"
 #include "AC/Character/AC_Tactician.h"
 #include "Engine/GameViewportClient.h"
+#include "Kismet/GameplayStatics.h"
 // Manager
 #include "AC/Managers/AC_ObjectManager.h"
 #include "AC/Managers/AC_UIManager.h"
@@ -79,6 +80,7 @@ bool AAC_PlayerController::bCheckMousePositionOnStore()
 
 	if (absoluteScreenX >= 550 && absoluteScreenX <= 1520 && absoluteScreenY >= 920 && absoluteScreenY <= 1080)
 	{
+		GetTactician()->SubMyTeamArr(Cast<AAC_Champion>(PickedActor));
 		ResellToStore.ExecuteIfBound(Cast<AAC_Champion>(PickedActor)->GetObjectKey());
 		PickedActor = nullptr;
 	}
@@ -233,6 +235,16 @@ bool AAC_PlayerController::CheckAndPlacePickedActor()
 	}
 
 	return true;
+}
+
+AAC_Tactician* AAC_PlayerController::GetTactician()
+{
+	if (Tactician == nullptr)
+	{
+		Tactician = Cast<AAC_Tactician>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+		Tactician->SetObjectKey(TEXT("Tactician") + FString::Printf(TEXT("%d"), 0));
+	}
+	return Tactician;
 }
 
 void AAC_PlayerController::SetupInputComponent()

@@ -13,6 +13,7 @@ DECLARE_DELEGATE_OneParam(FDele_ResellToStore, const FString&);
 class UNiagaraSystem;
 class USplineComponent;
 class IAC_TargetInterface;
+class AAC_Tactician;
 /**
  * 
  */
@@ -64,6 +65,13 @@ public:
 	bool CheckAndPlacePickedActor();
 
 	FVector pickedActorPrevLocation;
+
+public:
+	AAC_Tactician* GetTactician();
+
+private:
+	UPROPERTY()
+	TObjectPtr<AAC_Tactician> Tactician = nullptr;
 
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */

@@ -203,7 +203,10 @@ void AAC_ObjectManager::AddAndSpawnCharacter(const FString& key, FVector locatio
 		actor = (AAC_Champion*)GetWorld()->SpawnActor<AAC_ShroomPoison>(ShroomPoisonClass, location, rotation, spawnParams);
 
 	if (key.Contains(TEXT("Creep")))
+	{
 		actor->SetbIsEnemy(true);
+		actor->SetbInArena(true);
+	}
 
 	if (actor != nullptr)
 	{

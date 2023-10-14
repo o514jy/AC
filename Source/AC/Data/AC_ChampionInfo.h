@@ -36,6 +36,15 @@ public:
 	int Health = 0;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	int MaxHealth = 100;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	int Mana = 0;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	int MaxMana = 0;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	int AttackRange = 0;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)

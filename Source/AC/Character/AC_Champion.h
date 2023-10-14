@@ -8,8 +8,10 @@
 #include "../Interface/AC_TargetInterface.h"
 #include "AC_Champion.generated.h"
 
-class UPawnSensingComponent;
+//class UPawnSensingComponent;
 class AAC_Tactician;
+class UAC_AnimInstance;
+class USphereComponent;
 
 USTRUCT(BlueprintType)
 struct FChampionStat
@@ -20,6 +22,15 @@ public:
 	// Combat Stat
 	UPROPERTY()
 	int Health;
+
+	UPROPERTY()
+	int MaxHealth;
+
+	UPROPERTY()
+	int Mana;
+
+	UPROPERTY()
+	int MaxMana;
 
 	UPROPERTY()
 	int AttackRange;
@@ -72,13 +83,47 @@ public:
 	virtual void UnHighlightActor() override;
 
 public:
+	// Pawn Sensing 사용
+	//UPROPERTY(VisibleAnywhere)
+	//UPawnSensingComponent* PawnSensing;
+
+	//UFUNCTION()
+	//void OnPawnSeen(APawn* seenPawn);
+
+public:
+	// 탐지 관련
+	// 탐지 범위 설정
 	UPROPERTY(VisibleAnywhere)
-	UPawnSensingComponent* PawnSensing;
+	USphereComponent* DetectSphereCollision;
+	
+	UPROPERTY(VisibleAnywhere)
+	USphereComponent* AttackSphereCollision;
+
+	void BindOverlapDelegate(bool flag);
 
 	UFUNCTION()
-	void OnPawnSeen(APawn* seenPawn);
+	void OnDetectSphereOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	
+	UFUNCTION()
+	void OnAttackSphereOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	UFUNCTION()
+	void OnDetectSphereOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	
+	UFUNCTION()
+	void OnAttackSphereOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	bool IsInAttackRange(AAC_Champion* inTarget);
+
+	bool GetbInArena() { return bInArena; }
+	void SetbInArena(bool flag) { bInArena = flag; }
+
+private:
+	TArray<TObjectPtr<AAC_Champion>> DetectedChampionArr;
+
+	bool bInArena = false;
+
+public:
 
 	void SetState(EState newState);
 	EState GetState() { return State; }
@@ -91,6 +136,14 @@ public:
 
 	void SetbIsEnemy(bool isEnemy) { bIsEnemy = isEnemy; }
 	bool GetbIsEnemy() { return bIsEnemy; }
+
+public:
+	// Animation
+	UFUNCTION()
+	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+	bool bIsAttacking = false;
+	bool bIsSkilling = false;
 
 public:
 	virtual void InitChampionStat();
@@ -119,7 +172,8 @@ protected:
 
 	// creep인지 확인
 	bool bIsEnemy = false;
-
-
+		
+	UPROPERTY()
+	UAC_AnimInstance* ABAnim;
 
 };

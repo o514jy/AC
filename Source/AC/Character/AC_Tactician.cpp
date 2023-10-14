@@ -5,6 +5,7 @@
 #include "Components/CapsuleComponent.h"
 #include "AC/Data/AC_TacticianXpInfo.h"
 #include "AC/Enum/AC_Enum.h"
+#include "AC/Character/AC_Champion.h"
 // Manager
 #include "AC/Library/AC_FunctionLibrary.h"
 #include "AC/Managers/AC_UIManager.h"
@@ -152,7 +153,19 @@ TArray<FString> AAC_Tactician::GetWaitingChampionArr()
 
 void AAC_Tactician::SetArenaChampionArr(const FString& key, int i_index, int j_index)
 {
+	FString prevKey = ArenaChampionArr[i_index].ArenaChampionRowArr[j_index];
+	// 전에 있던게 교체되기때문에 myteam에서 빼기
+	if (prevKey != FString())
+	{
+		AAC_Champion* prevChamp = UAC_FunctionLibrary::GetObjectManager(GetWorld())->FindChampion(prevKey);
+		if (prevChamp != nullptr)
+			SubMyTeamArr(prevChamp);
+	}
+
 	ArenaChampionArr[i_index].ArenaChampionRowArr[j_index] = key;
+	AAC_Champion* presChamp = UAC_FunctionLibrary::GetObjectManager(GetWorld())->FindChampion(key);
+	if(presChamp != nullptr)
+		AddMyTeamArr(presChamp);
 }
 
 TArray<FArenaChampionRowArr> AAC_Tactician::GetArenaChampionArr()
@@ -202,6 +215,28 @@ TArray<FPlaceableArenaRowArr> AAC_Tactician::GetPlaceableArena()
 	}
 
 	return PlaceableArena;
+}
+
+void AAC_Tactician::AddMyTeamArr(AAC_Champion* champion)
+{
+	if (champion == nullptr)
+		return;
+
+	MyTeamArr.Add(champion);
+	champion->SetbInArena(true);
+}
+
+void AAC_Tactician::SubMyTeamArr(AAC_Champion* champion)
+{
+	if (champion == nullptr)
+		return;
+
+	int subIndex = MyTeamArr.Find(champion);
+	if (subIndex == INDEX_NONE)
+		return;
+
+	champion->SetbInArena(false);
+	MyTeamArr.RemoveAt(subIndex);
 }
 
 void AAC_Tactician::ActivateInterestFire()
