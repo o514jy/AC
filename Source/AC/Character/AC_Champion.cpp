@@ -20,6 +20,8 @@
 #include "AC/Enum/AC_Enum.h"
 #include "AC/Object/AC_EnvObject.h"
 #include "Engine/StaticMeshActor.h"
+#include "AC/UI/AC_HealthBarUI.h"
+#include "Components/WidgetComponent.h"
 
 AAC_Champion::AAC_Champion()
 {
@@ -48,6 +50,23 @@ AAC_Champion::AAC_Champion()
 	AttackSphereCollision->InitSphereRadius(100.0f);
 	AttackSphereCollision->SetCollisionProfileName(TEXT("AttackChampion"));
 
+	if (HealthBarUIClass == nullptr)
+	{
+		static ConstructorHelpers::FClassFinder<UAC_HealthBarUI> StoreUI(TEXT("WidgetBlueprint'/Game/Blueprints/UI/WBP_HealthBar.WBP_HealthBar_C'"));
+		if (StoreUI.Succeeded())
+			HealthBarUIClass = StoreUI.Class;
+	}
+
+	HealthBar = CreateDefaultSubobject<UWidgetComponent>("HealthBar");
+	HealthBar->SetupAttachment(RootComponent);
+	HealthBar->SetDrawAtDesiredSize(true);
+	HealthBar->SetWidgetSpace(EWidgetSpace::Screen);
+	HealthBar->SetWidgetClass(HealthBarUIClass);
+	
+	FTransform initTransform = HealthBar->GetRelativeTransform();
+	initTransform.SetLocation(FVector(0, 0, 80.f));
+	HealthBar->SetRelativeTransform(initTransform);
+
 	//PawnSensing = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensing"));
 	//PawnSensing->SetPeripheralVisionAngle(80.f);
 	//PawnSensing->bOnlySensePlayers = false;
@@ -63,8 +82,6 @@ AAC_Champion::AAC_Champion()
 void AAC_Champion::BeginPlay()
 {
 	Super::BeginPlay();
-
-	InitChampionStat();
 
 	this->SpawnDefaultController();
 
@@ -111,13 +128,31 @@ void AAC_Champion::TickIdle()
 
 	// Battle 상태일 경우 움직이기 시작
 	if (GetGameMaster()->GetRoundState() == EGameState::Battle)
+	{
 		SetState(EState::Move);
+		return;
+	}
+
+	// Ready 상태일때 위치 저장, 이미 저장되있으면 X, 크립이면 위치조정이 필요없기때문에 X
+	if (ReadyLocation != FVector(0, 0, 0) || this->GetbIsEnemy() == true)
+		return;
+
+	if (GetGameMaster()->GetRoundState() == EGameState::Ready)
+		ReadyLocation = GetActorLocation();
+
 }
 
 void AAC_Champion::TickMove()
 {
 	// 공격 사거리까지 타겟을 향해 움직이고 닿았으면 attack으로 전환, 마나가 풀일 경우 skill로 전환
 	
+	// Prepare 상태일 경우 Idle로
+	if (GetGameMaster()->GetRoundState() == EGameState::Prepare)
+	{
+		SetState(EState::Idle);
+		return;
+	}
+
 	// 가장 가까운 타겟을 고른다.
 	AAC_Champion* closestTarget = nullptr;
 	float closestDistance = MAX_FLT;
@@ -159,9 +194,25 @@ void AAC_Champion::TickMove()
 
 void AAC_Champion::TickAttack()
 {
+	// prepare상태가 되면 전투X
+	if (GetGameMaster()->GetRoundState() == EGameState::Prepare)
+	{
+		CombatTarget = nullptr;
+		SetState(EState::Move);
+		return;
+	}
+
 	// 이미 공격중일 경우 skip
 	if (bIsAttacking == true)
 		return;
+
+	// 상대가 죽었을 경우 skip
+	if (CombatTarget->GetState() == EState::Dead)
+	{
+		CombatTarget = nullptr;
+		SetState(EState::Move);
+		return;
+	}
 
 	// 공격속도에 따라 타겟이 사거리 내에 있을 경우 attack, 없을경우 move로 전환
 	if (IsInAttackRange(CombatTarget))
@@ -171,8 +222,7 @@ void AAC_Champion::TickAttack()
 	}
 	else
 	{
-		if (CombatTarget != nullptr)
-			SetState(EState::Move);
+		SetState(EState::Move);
 	}
 }
 
@@ -184,6 +234,12 @@ void AAC_Champion::TickSkill()
 void AAC_Champion::TickDead()
 {
 	// actor 삭제? 전투페이즈가 끝나면..dead가 아니라 invisible로 해야되나
+	// prepare상태가 되면 전투X
+	if (GetGameMaster()->GetRoundState() == EGameState::Prepare)
+	{
+		SetState(EState::Idle);
+		return;
+	}
 }
 
 void AAC_Champion::HighlightActor()
@@ -201,6 +257,32 @@ void AAC_Champion::UnHighlightActor()
 
 	GetMesh()->SetRenderCustomDepth(false);
 	Weapon->SetRenderCustomDepth(false);
+}
+
+void AAC_Champion::SendDamage()
+{
+	int finalDamage = this->ChampionStat.AttackDamage + this->ChampionStat.AbilityPower;
+
+	if (CombatTarget == nullptr)
+		return;
+
+	CombatTarget->OnDamaged(finalDamage);
+}
+
+bool AAC_Champion::OnDamaged(int damage)
+{
+	if (CombatTarget == nullptr)
+		return false;
+
+	this->ChampionStat.Health = fmax(0, this->ChampionStat.Health - damage);
+
+	UAC_HealthBarUI* widget = Cast<UAC_HealthBarUI>(HealthBar->GetUserWidgetObject());
+	widget->SetHealthBar((float)this->ChampionStat.Health / this->ChampionStat.MaxHealth);
+
+	if (this->ChampionStat.Health == 0)
+		SetState(EState::Dead);
+
+	return true;
 }
 
 //void AAC_Champion::OnPawnSeen(APawn* seenPawn)
@@ -350,6 +432,23 @@ void AAC_Champion::SetState(EState newState)
 	{
 	case EState::Idle:
 		State = EState::Idle;
+		if (GetGameMaster()->GetRoundState() == EGameState::Prepare)
+		{
+			DetectedChampionArr.Empty();
+
+			this->SetActorLocation(ReadyLocation);
+
+			auto aiController = Cast<AAIController>(GetController());
+			aiController->StopMovement();
+
+			this->SetActorHiddenInGame(false);
+			this->SetActorEnableCollision(true);
+
+			this->ChampionStat.Health = this->ChampionStat.MaxHealth;
+
+			UAC_HealthBarUI* widget = Cast<UAC_HealthBarUI>(HealthBar->GetUserWidgetObject());
+			widget->SetHealthBar((float)this->ChampionStat.Health / this->ChampionStat.MaxHealth);
+		}
 		BindOverlapDelegate(false);
 		break;
 	case EState::Move:
@@ -366,6 +465,8 @@ void AAC_Champion::SetState(EState newState)
 		break;
 	case EState::Dead:
 		State = EState::Dead;
+		this->SetActorHiddenInGame(true);
+		this->SetActorEnableCollision(false);
 		BindOverlapDelegate(false);
 		break;
 	}
@@ -406,11 +507,7 @@ TObjectPtr<AAC_Tactician> AAC_Champion::GetOwnerTactician()
 
 void AAC_Champion::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (GetState() == EState::Attack)
-		bIsAttacking = false;
-
-	if (GetState() == EState::Skill)
-		bIsSkilling = false;
+	bIsAttacking = false;
 }
 
 void AAC_Champion::InitChampionStat()
@@ -436,6 +533,9 @@ void AAC_Champion::InitChampionStat()
 	ChampionStat.ChampionStarLevel = initData.ChampionStarLevel;
 	ChampionStat.Ethnic = initData.Ethnic;
 	ChampionStat.Occupation = initData.Occupation;
+
+	UAC_HealthBarUI* widget = Cast<UAC_HealthBarUI>(HealthBar->GetUserWidgetObject());
+	widget->SetHealthBar((float)this->ChampionStat.Health / this->ChampionStat.MaxHealth);
 }
 
 void AAC_Champion::MoveToCombatTarget(AAC_Champion* inTarget)

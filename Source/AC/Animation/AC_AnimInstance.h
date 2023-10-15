@@ -33,6 +33,8 @@ private:
 	UAnimMontage* SKillMontage;
 
 private:
+	// Montage
+
 	UAnimMontage* DemonRedAttackMontage;
 	UAnimMontage* DemonRedSkillMontage;
 
@@ -53,4 +55,10 @@ private:
 
 	UAnimMontage* ShroomPoisonAttackMontage;
 	UAnimMontage* ShroomPoisonSkillMontage;
+
+private:
+	// Notify
+	UFUNCTION()
+	void AnimNotify_Attack();
+
 };

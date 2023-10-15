@@ -8,10 +8,14 @@
 #include "../Interface/AC_TargetInterface.h"
 #include "AC_Champion.generated.h"
 
+//DECLARE_DELEGATE_OneParam(FDele_SendDamage, int);
+
 //class UPawnSensingComponent;
 class AAC_Tactician;
 class UAC_AnimInstance;
+class UAC_HealthBarUI;
 class USphereComponent;
+class UWidgetComponent;
 
 USTRUCT(BlueprintType)
 struct FChampionStat
@@ -81,6 +85,23 @@ public:
 
 	virtual void HighlightActor() override;
 	virtual void UnHighlightActor() override;
+
+public:
+	// hp bar UI
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UWidgetComponent> HealthBar;
+
+	UPROPERTY()
+	TObjectPtr<UAC_HealthBarUI> HealthBarUI = nullptr;
+
+	UPROPERTY()
+	TSubclassOf<UAC_HealthBarUI> HealthBarUIClass = nullptr;
+
+public:
+	// damage 판정
+	void SendDamage();
+
+	bool OnDamaged(int damage);
 
 public:
 	// Pawn Sensing 사용
@@ -176,4 +197,7 @@ protected:
 	UPROPERTY()
 	UAC_AnimInstance* ABAnim;
 
+	// ready 상태일때 위치
+	FVector ReadyLocation = FVector(0, 0, 0);
+	
 };

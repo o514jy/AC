@@ -2,6 +2,7 @@
 
 
 #include "Animation/AC_AnimInstance.h"
+#include "AC/Character/AC_Champion.h"
 
 UAC_AnimInstance::UAC_AnimInstance()
 {
@@ -149,4 +150,9 @@ void UAC_AnimInstance::SetPlaySkillMontage(const FString& key)
 
 	if (key.Contains(TEXT("ShroomPoison")))
 		SKillMontage = ShroomPoisonSkillMontage;
+}
+
+void UAC_AnimInstance::AnimNotify_Attack()
+{
+	Cast<AAC_Champion>(TryGetPawnOwner())->SendDamage();
 }
