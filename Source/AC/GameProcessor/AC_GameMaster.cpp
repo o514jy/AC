@@ -167,7 +167,9 @@ void AAC_GameMaster::ResellChampionCardUsingKey(const FString& key)
 	AAC_ObjectManager* OM = UAC_FunctionLibrary::GetObjectManager(GetWorld());
 	
 	GetTactician()->AddPossessionGold(OM->FindChampion(key)->GetChampionStat().ChampionCost);
+	GetTactician()->SubMyTeamArr(OM->FindChampion(key));
 
+	// 원래 자리에 있던 정보 초기화 (대기석)
 	TArray<FString> wcarr = GetTactician()->GetWaitingChampionArr();
 	for (int i = 0; i < wcarr.Num(); i++)
 	{
@@ -175,6 +177,19 @@ void AAC_GameMaster::ResellChampionCardUsingKey(const FString& key)
 		{
 			GetTactician()->SetWaitingChampionArr(FString(), i);
 			break;
+		}
+	}
+
+	// 원래 자리에 있던 정보 초기화 (전투지역)
+	TArray<FArenaChampionRowArr> arenaArr = GetTactician()->GetArenaChampionArr();
+	for (int i = 0; i < arenaArr.Num(); i++)
+	{
+		for (int j = 0; j < arenaArr[i].ArenaChampionRowArr.Num(); j++)
+		{
+			if (arenaArr[i].ArenaChampionRowArr[j] == key)
+			{
+				GetTactician()->SetArenaChampionArr(FString(), i, j);
+			}
 		}
 	}
 
@@ -266,6 +281,7 @@ void AAC_GameMaster::SetGame()
 	if (bRoundStart == false)
 	{
 		uiManager->OpenUI(EUIType::GameRoundUI);
+		Cast<UAC_GameRoundUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::GameRoundUI))->SetMaxTeamNumText(GetTactician()->GetTacticianStat().MaxTeamNum);
 		bRoundStart = true;
 		SetGameRound(0);
 		RoundState = EGameState::Battle;
@@ -367,8 +383,9 @@ void AAC_GameMaster::SetPrepareState()
 	else
 		championStoreUI->SetStoreReRoll();
 
-	// 전투가 끝났을 경우 팀 다시 위치로 복원
-
+	// 전략가에게 경험치2 + 기본 골드 + 이자 주기
+	GetTactician()->addXp(2);
+	GetTactician()->AddPossessionGold(5 + GetTactician()->GetTacticianStat().PossessionGold / 10);
 
 }
 

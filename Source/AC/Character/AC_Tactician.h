@@ -20,7 +20,7 @@ public:
 	int Level = 1;
 
 	UPROPERTY()
-	int MaxTeamNum = 1;
+	int MaxTeamNum = Level + 2;
 
 	UPROPERTY()
 	int Xp = 0;
@@ -29,7 +29,7 @@ public:
 	int maxXp = 0;
 
 	UPROPERTY()
-	int PossessionGold = 70;
+	int PossessionGold = 10;
 
 	UPROPERTY()
 	int Health = 100;

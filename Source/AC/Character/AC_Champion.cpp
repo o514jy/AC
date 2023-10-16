@@ -126,6 +126,10 @@ void AAC_Champion::TickIdle()
 	//if (GetGameMaster()->GetRoundState() == EGameState::Ready)
 		//BindOverlapDelegate(true);
 
+	// 대기석에 있는 경우 계속 Idle 상태
+	if (this->GetbInArena() == false)
+		return;
+
 	// Battle 상태일 경우 움직이기 시작
 	if (GetGameMaster()->GetRoundState() == EGameState::Battle)
 	{

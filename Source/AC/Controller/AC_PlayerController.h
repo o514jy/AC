@@ -14,6 +14,7 @@ class UNiagaraSystem;
 class USplineComponent;
 class IAC_TargetInterface;
 class AAC_Tactician;
+class AAC_GameMaster;
 /**
  * 
  */
@@ -65,6 +66,13 @@ public:
 	bool CheckAndPlacePickedActor();
 
 	FVector pickedActorPrevLocation;
+
+public:
+	// Temp
+	AAC_GameMaster* GetGameMaster();
+
+private:
+	TObjectPtr<AAC_GameMaster> GameMaster = nullptr;
 
 public:
 	AAC_Tactician* GetTactician();

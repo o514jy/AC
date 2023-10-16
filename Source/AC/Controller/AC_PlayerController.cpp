@@ -17,6 +17,7 @@
 #include "AC/Character/AC_Tactician.h"
 #include "Engine/GameViewportClient.h"
 #include "Kismet/GameplayStatics.h"
+#include "AC/GameProcessor/AC_GameMaster.h"
 // Manager
 #include "AC/Managers/AC_ObjectManager.h"
 #include "AC/Managers/AC_UIManager.h"
@@ -237,6 +238,19 @@ bool AAC_PlayerController::CheckAndPlacePickedActor()
 	return true;
 }
 
+AAC_GameMaster* AAC_PlayerController::GetGameMaster()
+{
+	TArray<AActor*> arrOutActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AAC_GameMaster::StaticClass(), arrOutActors);
+
+	for (int i = 0; i < arrOutActors.Num(); ++i)
+	{
+		GameMaster = dynamic_cast<AAC_GameMaster*>(arrOutActors[i]);
+	}
+
+	return GameMaster;
+}
+
 AAC_Tactician* AAC_PlayerController::GetTactician()
 {
 	if (Tactician == nullptr)
@@ -446,6 +460,13 @@ void AAC_PlayerController::TickCursorTrace()
 		if (Cast<AAC_Champion>(LocalTargetActor)->GetbIsEnemy() == true)
 			return;
 
+		// Ready, battle 상태일 때 전장에 참여중인 챔피언 표시X
+		if (GetGameMaster()->GetRoundState() == EGameState::Ready || GetGameMaster()->GetRoundState() == EGameState::Battle)
+		{
+			if (Cast<AAC_Champion>(LocalTargetActor)->GetbInArena() == true)
+				return;
+		}
+
 		if (TargetActor)
 		{
 			// 원래 있었는데 다른 애였음
@@ -486,9 +507,19 @@ void AAC_PlayerController::PickingObject()
 		return;
 	}
 
-	if (championStoreUI->GetSellingButtonVisible() == false)
+	if (championStoreUI->GetSellingButtonVisible() == false && PickedActor != nullptr)
 	{
 		championStoreUI->SetSellingButtonAndPrice(true, pickedChampion->GetChampionStat().ChampionCost);
+	}
+
+	// Ready, battle 상태일 때 전장에 참여중인 챔피언 표시X
+	if (GetGameMaster()->GetRoundState() == EGameState::Ready || GetGameMaster()->GetRoundState() == EGameState::Battle)
+	{
+		if (Cast<AAC_Champion>(PickedActor)->GetbInArena() == true)
+		{
+			PickedActor = nullptr;
+			return;
+		}
 	}
 
 	FHitResult CursorHit;

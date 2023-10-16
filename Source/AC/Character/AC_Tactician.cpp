@@ -45,7 +45,9 @@ FTacticianStat AAC_Tactician::GetTacticianStat()
 void AAC_Tactician::SetLevel(int level)
 {
 	TacticianStat.Level = level;
+	TacticianStat.MaxTeamNum = level + 2;
 	Cast<UAC_ChampionStoreUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::ChampionStoreUI))->SetbTacticianLevelText(level);
+	Cast<UAC_GameRoundUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::GameRoundUI))->SetMaxTeamNumText(GetTacticianStat().MaxTeamNum);
 }
 
 void AAC_Tactician::SetXp(int xp)
@@ -224,6 +226,8 @@ void AAC_Tactician::AddMyTeamArr(AAC_Champion* champion)
 
 	MyTeamArr.Add(champion);
 	champion->SetbInArena(true);
+
+	Cast<UAC_GameRoundUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::GameRoundUI))->SetPresentTeamNumText(GetMyTeamArr().Num());
 }
 
 void AAC_Tactician::SubMyTeamArr(AAC_Champion* champion)
@@ -237,6 +241,8 @@ void AAC_Tactician::SubMyTeamArr(AAC_Champion* champion)
 
 	champion->SetbInArena(false);
 	MyTeamArr.RemoveAt(subIndex);
+
+	Cast<UAC_GameRoundUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::GameRoundUI))->SetPresentTeamNumText(GetMyTeamArr().Num());
 }
 
 void AAC_Tactician::ActivateInterestFire()

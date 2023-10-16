@@ -10,6 +10,7 @@
 class UTextBlock;
 class UButton;
 class UImage;
+class UTexture2D;
 
 class AAC_GameMaster;
 
@@ -28,6 +29,8 @@ public:
 	void SetbSold(bool sold);
 
 	bool GetbSold() { return bSold; }
+
+	UTexture2D* GetImagePath(FString key);
 
 private:
 	// button event
