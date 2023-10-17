@@ -49,7 +49,7 @@ enum class EGameState : uint8
 #define Def_NS_Fire4 3
 #define Def_NS_Fire5 4
 
-#define TimeLimit_Prepare 7
+#define TimeLimit_Prepare 12
 #define TimeLimit_Ready 3
 #define TimeLimit_Battle 15
 

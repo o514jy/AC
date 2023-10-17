@@ -205,7 +205,7 @@ bool AAC_PlayerController::CheckAndPlacePickedActor()
 	// 내려놓을 자리에 이미 다른 챔피언이 있었으면 이전 자리와 교체
 	if (currLocKey != FString())
 	{
-		UAC_FunctionLibrary::GetObjectManager(GetWorld())->FindChampion(currLocKey)->SetActorLocation(pickedActorPrevLocation);
+		UAC_FunctionLibrary::GetObjectManager(GetWorld())->FindChampion(currLocKey)->SetActorLocation(tempLoc);
 	}
 
 	switch (whatIndex) // wait : 1, arena : 2
@@ -230,6 +230,19 @@ bool AAC_PlayerController::CheckAndPlacePickedActor()
 		break;
 	case 2:
 		Cast<AAC_Tactician>(GetCharacter())->SetArenaChampionArr(Cast<AAC_Champion>(PickedActor)->GetObjectKey(), arenaCurrIndex.Key, arenaCurrIndex.Value);
+		break;
+	default:
+		break;
+	}
+
+	// 한번 더 놔서 inarena 활성화
+	switch (whatIndex) // wait : 1, arena : 2
+	{
+	case 1:
+		Cast<AAC_Tactician>(GetCharacter())->SetWaitingChampionArr(currLocKey, waitIndex);
+		break;
+	case 2:
+		Cast<AAC_Tactician>(GetCharacter())->SetArenaChampionArr(currLocKey, arenaIndex.Key, arenaIndex.Value);
 		break;
 	default:
 		break;
@@ -400,22 +413,31 @@ void AAC_PlayerController::OnSetLeftMouseButtonReleased()
 		}
 		else
 		{
+			APawn* PickedPawn = Cast<APawn>(PickedActor);
+			if(PickedPawn)
+				PickedPawn->SetActorEnableCollision(true);
+
 			bCheckMousePositionOnStore();
 
 			if (PickedActor != nullptr && CheckAndPlacePickedActor() == false)
 				Cast<AAC_Champion>(PickedActor)->SetActorLocation(pickedActorPrevLocation);
 
 			bIsPicked = false;
+			
 			PickedActor = nullptr;
 		}
 	}
 	else
 	{
+		APawn* PickedPawn = Cast<APawn>(PickedActor);
+		if (PickedPawn)
+			PickedPawn->SetActorEnableCollision(true);
+
 		bCheckMousePositionOnStore();
 
 		if (PickedActor != nullptr && CheckAndPlacePickedActor() == false)
 			Cast<AAC_Champion>(PickedActor)->SetActorLocation(pickedActorPrevLocation);
-
+		
 		PickedActor = nullptr;
 	}
 
@@ -507,11 +529,6 @@ void AAC_PlayerController::PickingObject()
 		return;
 	}
 
-	if (championStoreUI->GetSellingButtonVisible() == false && PickedActor != nullptr)
-	{
-		championStoreUI->SetSellingButtonAndPrice(true, pickedChampion->GetChampionStat().ChampionCost);
-	}
-
 	// Ready, battle 상태일 때 전장에 참여중인 챔피언 표시X
 	if (GetGameMaster()->GetRoundState() == EGameState::Ready || GetGameMaster()->GetRoundState() == EGameState::Battle)
 	{
@@ -522,6 +539,11 @@ void AAC_PlayerController::PickingObject()
 		}
 	}
 
+	if (championStoreUI->GetSellingButtonVisible() == false && PickedActor != nullptr)
+	{
+		championStoreUI->SetSellingButtonAndPrice(true, pickedChampion->GetChampionStat().ChampionCost);
+	}
+
 	FHitResult CursorHit;
 
 	// GameTraceChannel3 = TraceFloor
@@ -529,7 +551,10 @@ void AAC_PlayerController::PickingObject()
 	//GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, false, CursorHitTemp);
 	
 	// 커서에 캐릭터 붙이기
+	if (PickedActor == nullptr)
+		return;
 	APawn* PickedPawn = Cast<APawn>(PickedActor);
+	PickedPawn->SetActorEnableCollision(false);
 	FVector LocationXYZ = CursorHit.Location;
 	LocationXYZ.Z = PickedPawn->GetActorLocation().Z;
 	

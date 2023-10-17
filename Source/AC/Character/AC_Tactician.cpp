@@ -224,6 +224,11 @@ void AAC_Tactician::AddMyTeamArr(AAC_Champion* champion)
 	if (champion == nullptr)
 		return;
 
+	// 이미 있는지 확인
+	int addIndex = MyTeamArr.Find(champion);
+	if (addIndex != INDEX_NONE)
+		return;
+
 	MyTeamArr.Add(champion);
 	champion->SetbInArena(true);
 

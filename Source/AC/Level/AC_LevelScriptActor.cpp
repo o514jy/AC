@@ -34,10 +34,7 @@ void AAC_LevelScriptActor::BeginPlay()
 	APlayerController* TacticianPlayController = UGameplayStatics::GetPlayerController(this, 0);
 	TacticianPlayController->SetViewTargetWithBlend(camera, 0.f);
 
-	// 초기 UI 생성
-	UAC_FunctionLibrary::GetUIManager(GetWorld())->OpenUI(EUIType::ChampionStoreUI);
 	GetGameMaster();
-	Cast<UAC_ChampionStoreUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::ChampionStoreUI))->InitStoreUI();
 	
 	//Cast<UAC_ChampionStoreUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::ChampionStoreUI))->SetChampionCards();
 	

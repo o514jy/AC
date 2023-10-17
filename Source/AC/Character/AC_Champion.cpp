@@ -583,9 +583,13 @@ void AAC_Champion::MoveToCombatTarget(AAC_Champion* inTarget)
 	// 바라보고 있는 방향으로 이동할 위치
 	//FVector DestinationLocation = CurrentLocation + CurrentRotation.Vector() * MoveDistance;
 
-	// 맵 중앙 위치로
+	// 상대쪽 진형 위치로
 	FVector DestinationLocation = UAC_FunctionLibrary::GetObjectManager(GetWorld())->GetEnvObject()->GetArena()[Def_ArenaRightUp]->GetActorLocation();
-	
+	if (this->GetbIsEnemy() == false)
+		DestinationLocation.X += 300.f;
+	else
+		DestinationLocation.X -= 300.f;
+
 	// SimpleMoveToLocation 목적지로 이동
 	if (aiController)
 	{

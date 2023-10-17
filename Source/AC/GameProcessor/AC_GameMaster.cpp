@@ -280,6 +280,8 @@ void AAC_GameMaster::SetGame()
 	
 	if (bRoundStart == false)
 	{
+		UAC_FunctionLibrary::GetUIManager(GetWorld())->OpenUI(EUIType::ChampionStoreUI);
+		Cast<UAC_ChampionStoreUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::ChampionStoreUI))->InitStoreUI();
 		uiManager->OpenUI(EUIType::GameRoundUI);
 		Cast<UAC_GameRoundUI>(UAC_FunctionLibrary::GetUIManager(GetWorld())->GetUI(EUIType::GameRoundUI))->SetMaxTeamNumText(GetTactician()->GetTacticianStat().MaxTeamNum);
 		bRoundStart = true;
